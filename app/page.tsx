@@ -130,7 +130,7 @@ export default function LandingPage() {
               {features.map((feature) => {
                 const Icon = feature.icon;
                 return (
-                  <Card key={feature.title} className="h-full hover:shadow-lg transition-shadow !p-[30px_70px_32px_26px] max-w-full sm:max-w-[400px] mx-auto w-full">
+                  <Card key={feature.title} className="h-full hover:shadow-lg transition-shadow !p-[30px_70px_32px_26px] max-w-full sm:max-w-[400px] mx-auto w-full border-white/50">
                     <CardHeader>
                       <div className="w-[90px] h-[90px] rounded-xl flex items-center justify-center !mb-4">
                         <Icon className="w-[85px] h-[85px] text-primary" />
@@ -246,7 +246,7 @@ export default function LandingPage() {
 
               <div className="relative">
                 <div className="grid grid-cols-2 gap-6">
-                  <Card className="p-6 !px-6 text-center !py-6 hover:shadow-lg transition-shadow">
+                  <Card className="p-6 !px-6 text-center !py-6 hover:shadow-lg transition-shadow border-white/50">
                     <QrCode className="w-14 h-14  text-primary w-full" />
                     <p className="font-medium text-xl">QR Access</p>
                     <p className="text-muted-foreground text-sm">
@@ -254,7 +254,7 @@ export default function LandingPage() {
                     </p>
                   </Card>
 
-                  <Card className="p-6 !px-6 text-center !py-6 text-center hover:shadow-lg transition-shadow">
+                  <Card className="p-6 !px-6 text-center !py-6 text-center hover:shadow-lg transition-shadow border-white/50">
                     <Shield className="w-14 h-14 mx-auto !mb-4 text-primary w-full" />
                     <p className="font-medium text-xl">Moderated</p>
                     <p className="text-muted-foreground">
@@ -262,7 +262,7 @@ export default function LandingPage() {
                     </p>
                   </Card>
 
-                  <Card className="p-6 !px-6 text-center !py-6 hover:shadow-lg transition-shadow">
+                  <Card className="p-6 !px-6 text-center !py-6 hover:shadow-lg transition-shadow border-white/50">
                     <Smartphone className="w-14 h-14 mx-auto !mb-4 text-primary w-full" />
                     <p className="font-medium text-xl">Mobile First</p>
                     <p className="text-muted-foreground">
@@ -270,7 +270,7 @@ export default function LandingPage() {
                     </p>
                   </Card>
 
-                  <Card className="p-6 !px-6 text-center !py-6 hover:shadow-lg transition-shadow">
+                  <Card className="p-6 !px-6 text-center !py-6 hover:shadow-lg transition-shadow border-white/50">
                     <Zap className="w-14 h-14 mx-auto !mb-4 text-primary w-full" />
                     <p className="font-medium text-xl">Real-time</p>
                     <p className="text-muted-foreground">

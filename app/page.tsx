@@ -577,7 +577,7 @@ export default function LandingPage() {
 
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
+      <section className="py-20 bg-brand-300 text-primary-foreground">
         <div className="w-full !px-6 sm:px-8 lg:px-12 !py-20 lg:py-24 flex justify-center">
           <div className="text-center max-w-4xl w-full">
             <h2 className="text-3xl lg:text-4xl !mb-6">
@@ -588,7 +588,7 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/dashboard">
-                <Button variant="secondary" size="lg" className="gap-2 min-w-[200px]">
+                <Button variant="default" size="lg" className="gap-2 min-w-[200px]">
                   Start Free Account
                   <ArrowRight className="w-4 h-4" />
                 </Button>

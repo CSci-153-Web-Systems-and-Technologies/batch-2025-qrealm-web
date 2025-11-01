@@ -231,3 +231,57 @@ a {
     color-scheme: dark;
   }
 }
+
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.2;
+  /* color: var(--color-black-500); */
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+h6 {
+  font-size: 1.125rem;
+}
+
+body {
+  font-family: var(--font-plus-jakarta-sans), system-ui, sans-serif;
+  line-height: 1.6;
+  color: var(--color-black-400);
+}
+
+/* Responsive typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+  }
+}

@@ -30,6 +30,33 @@ const config: Config = {
           800: '#383e80',
           900: '#2b2f61',
         },
+        // White palette
+        white: {
+          50: '#ffffff',
+          100: '#ffffff',
+          200: '#ffffff',
+          300: '#ffffff',
+          400: '#ffffff',
+          500: '#ffffff',
+          600: '#e8e8e8',
+          700: '#b5b5b5',
+          800: '#8c8c8c',
+          900: '#6b6b6b',
+        },
+        // Black palette
+        black: {
+          50: '#e6e6e6',
+          100: '#b0b0b0',
+          200: '#8a8a8a',
+          300: '#545454',
+          400: '#333333',
+          500: '#000000',
+          600: '#000000',
+          700: '#000000',
+          800: '#000000',
+          900: '#000000',
+        },
+
         // shadcn/ui colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

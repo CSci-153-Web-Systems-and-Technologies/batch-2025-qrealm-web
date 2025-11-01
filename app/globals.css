@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Your custom brand colors */
+  /* Custom brand colors */
   --brand-50: #f0f1fd;
   --brand-100: #d0d3f8;
   --brand-200: #b9bef4;
@@ -15,6 +15,18 @@
   --brand-700: #4850a5;
   --brand-800: #383e80;
   --brand-900: #2b2f61;
+
+  /* White color palette */
+  --white-50: #ffffff;
+  --white-100: #ffffff;
+  --white-200: #ffffff;
+  --white-300: #ffffff;
+  --white-400: #ffffff;
+  --white-500: #ffffff;
+  --white-600: #e8e8e8;
+  --white-700: #b5b5b5;
+  --white-800: #8c8c8c;
+  --white-900: #6b6b6b;
 
   /* shadcn colors updated to use your brand-500 */
   --radius: 0.5rem;
@@ -86,7 +98,7 @@
 }
 
 @theme inline {
-  /* Your custom brand colors */
+  /* custom brand colors */
   --color-brand-50: var(--brand-50);
   --color-brand-100: var(--brand-100);
   --color-brand-200: var(--brand-200);
@@ -97,6 +109,18 @@
   --color-brand-700: var(--brand-700);
   --color-brand-800: var(--brand-800);
   --color-brand-900: var(--brand-900);
+
+  /* White color palette */
+  --color-white-50: var(--white-50);
+  --color-white-100: var(--white-100);
+  --color-white-200: var(--white-200);
+  --color-white-300: var(--white-300);
+  --color-white-400: var(--white-400);
+  --color-white-500: var(--white-500);
+  --color-white-600: var(--white-600);
+  --color-white-700: var(--white-700);
+  --color-white-800: var(--white-800);
+  --color-white-900: var(--white-900);
 
   /* shadcn colors */
   --radius-sm: calc(var(--radius) - 4px);

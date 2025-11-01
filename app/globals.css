@@ -28,6 +28,18 @@
   --white-800: #8c8c8c;
   --white-900: #6b6b6b;
 
+  /* Black color palette */
+  --black-50: #e6e6e6;
+  --black-100: #b0b0b0;
+  --black-200: #8a8a8a;
+  --black-300: #545454;
+  --black-400: #333333;
+  --black-500: #000000;
+  --black-600: #000000;
+  --black-700: #000000;
+  --black-800: #000000;
+  --black-900: #000000;
+
   /* shadcn colors updated to use your brand-500 */
   --radius: 0.5rem;
   --background: oklch(1 0 0);
@@ -121,6 +133,18 @@
   --color-white-700: var(--white-700);
   --color-white-800: var(--white-800);
   --color-white-900: var(--white-900);
+
+  /* Black color palette */
+  --color-black-50: var(--black-50);
+  --color-black-100: var(--black-100);
+  --color-black-200: var(--black-200);
+  --color-black-300: var(--black-300);
+  --color-black-400: var(--black-400);
+  --color-black-500: var(--black-500);
+  --color-black-600: var(--black-600);
+  --color-black-700: var(--black-700);
+  --color-black-800: var(--black-800);
+  --color-black-900: var(--black-900);
 
   /* shadcn colors */
   --radius-sm: calc(var(--radius) - 4px);

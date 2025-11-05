@@ -27,3 +27,17 @@ export const createClient = async () => {
     }
   )
 }
+
+// Helper function to get server session
+export const getServerSession = async () => {
+  const supabase = await createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  return session
+}
+
+// Helper function to get server user
+export const getServerUser = async () => {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
+}

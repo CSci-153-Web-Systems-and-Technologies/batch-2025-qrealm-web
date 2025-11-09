@@ -101,59 +101,27 @@ export const useEventStore = create<EventState>((set, get) => ({
 
   // Create new event
   createEvent: async (data: CreateEventData) => {
-    const supabase = createClient()
-    
     set({ isLoading: true, error: null })
     
     try {
-        // Get current user for RLS policy
-        const user = await getCurrentUser()
+        const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+        })
 
-        // Validate input
-        const parsed = createEventSchema.safeParse(data)
-        if (!parsed.success) {
-            const message = parsed.error.issues
-                .map(e => `${e.path.join(".")}: ${e.message}`)
-                .join(", ")
-            
-            console.warn("Zod validation error:", parsed.error.format())
+        const result = await response.json()
 
-            set({ error: message, isLoading: false })
-            return { success: false, error: message }
+        if (!response.ok) {
+        throw new Error(result.error || 'Failed to create event')
         }
 
-        // Use validated data & Convert frontend data to database format
-        const dbData = convertFrontendEventToDatabase(parsed.data)
-
+        // Convert database event to frontend format
+        const frontendEvent = convertDatabaseEventToFrontend(result.event)
         
-        
-        // Add required fields for RLS policies
-        const finalData = {
-        ...dbData,
-        created_by: user.id, // ← CRITICAL: This satisfies RLS policy
-        ip_address: await getClientIP()
-        }
-
-        console.log('Creating event with data:', finalData)
-
-        const { data: event, error } = await supabase
-        .from('events')
-        .insert([finalData])
-        .select(`
-            *,
-            event_codes (*)
-        `)
-        .single()
-
-        if (error) {
-        console.error('Error creating event:', error)
-        set({ error: error.message, isLoading: false })
-        return { success: false, error: error.message }
-        }
-
-        // Convert to frontend format and update state
-        const frontendEvent = convertDatabaseEventToFrontend(event)
-
+        // Update local state
         set(state => ({ 
         events: [frontendEvent, ...state.events],
         currentEvent: frontendEvent,
@@ -162,9 +130,7 @@ export const useEventStore = create<EventState>((set, get) => ({
 
         return { success: true, event: frontendEvent }
     } catch (error) {
-        console.error('Unexpected error creating event:', error)
         const errorMessage = error instanceof Error ? error.message : 'Failed to create event'
-
         set({ error: errorMessage, isLoading: false })
         return { success: false, error: errorMessage }
     }
@@ -185,7 +151,7 @@ export const useEventStore = create<EventState>((set, get) => ({
         }
         // Convert frontend data to database format
       const dbData = convertFrontendEventToDatabase(parsed.data)
-      
+
       const { error } = await supabase
         .from('events')
         .update(dbData)

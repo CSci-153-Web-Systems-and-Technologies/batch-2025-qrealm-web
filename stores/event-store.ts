@@ -101,39 +101,44 @@ export const useEventStore = create<EventState>((set, get) => ({
 
   // Create new event
   createEvent: async (data: CreateEventData) => {
-    set({ isLoading: true, error: null })
-    
-    try {
-        const response = await fetch('/api/events', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-        })
+  set({ isLoading: true, error: null })
+  
+  try {
+    const response = await fetch('/api/events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
 
-        const result = await response.json()
+    const result = await response.json()
 
-        if (!response.ok) {
-        throw new Error(result.error || 'Failed to create event')
-        }
-
-        // Convert database event to frontend format
-        const frontendEvent = convertDatabaseEventToFrontend(result.event)
-        
-        // Update local state
-        set(state => ({ 
-        events: [frontendEvent, ...state.events],
-        currentEvent: frontendEvent,
-        isLoading: false 
-        }))
-
-        return { success: true, event: frontendEvent }
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to create event'
-        set({ error: errorMessage, isLoading: false })
-        return { success: false, error: errorMessage }
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create event')
     }
+
+    // Convert database event to frontend format
+    const frontendEvent = convertDatabaseEventToFrontend(result.event)
+    
+    // Update local state
+    set(state => ({ 
+      events: [frontendEvent, ...state.events],
+      currentEvent: frontendEvent,
+      isLoading: false 
+    }))
+
+    // ✅ REDIRECT TO EVENT DETAIL PAGE WITH QR CODE
+    if (result.event?.id) {
+      window.location.href = `/events/${result.event.id}`
+    }
+
+    return { success: true, event: frontendEvent }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create event'
+    set({ error: errorMessage, isLoading: false })
+    return { success: false, error: errorMessage }
+  }
 },
 
   // Update existing event

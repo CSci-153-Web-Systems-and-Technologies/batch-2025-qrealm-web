@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { createEventSchema } from "@/types/event.schema"
 import { createClient } from "@/utils/supabase/server"
 import { convertFrontendEventToDatabase } from "@/types/event"
+import { EventQRGenerator } from '@/lib/qr-generator'
+
 
 export async function POST(req: Request) {
   try {
@@ -72,11 +74,54 @@ export async function POST(req: Request) {
         { status: 500 }
       )
     }
+// 🎯 CRITICAL: GENERATE QR CODE FOR THE NEW EVENT
+    console.log('Generating QR code for event:', event.id)
+    try {
+      const { code, qrCodeUrl } = await EventQRGenerator.generateEventQRCode()
+      
+      const { error: qrError } = await supabase
+        .from('event_codes')
+        .insert({
+          event_id: event.id,
+          code: code,
+          qr_code_url: qrCodeUrl
+        })
 
-    // ✅ Success response
+      if (qrError) {
+        console.error('Error saving QR code:', qrError)
+        // Don't fail the entire request if QR code fails
+        // We can regenerate QR codes later if needed
+      } else {
+        console.log('✅ QR code generated successfully:', code)
+      }
+    } catch (qrError) {
+      console.error('❌ Error generating QR code:', qrError)
+      // Continue even if QR generation fails - event is still created
+    }
+
+    // ✅ Fetch the complete event with QR code
+    const { data: completeEvent, error: fetchError } = await supabase
+      .from('events')
+      .select(`
+        *,
+        event_codes (*)
+      `)
+      .eq('id', event.id)
+      .single()
+
+    if (fetchError) {
+      console.error('Error fetching event with QR code:', fetchError)
+      // Return the original event even if fetch fails
+      return NextResponse.json({ 
+        success: true,
+        event: event 
+      }, { status: 201 })
+    }
+
+    // ✅ Success response with complete event data including QR code
     return NextResponse.json({ 
       success: true,
-      event: event 
+      event: completeEvent 
     }, { status: 201 })
 
   } catch (err: any) {

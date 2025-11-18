@@ -4,6 +4,8 @@ import { useAuthStore } from '@/stores/auth-store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import TestEventStore from '@/components/test-event-store'
+import Link from "next/link";
+
 
 //Temporary Admin Dashboard Page
 
@@ -46,8 +48,9 @@ export default function DashboardPage() {
             <CardDescription>Manage your events</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button className="w-full" variant="outline">
-              Create New Event
+            {/* Create New Event */}
+            <Button asChild size="lg" className="w-full" variant="outline">
+              <Link href="/events/new">Create New Event</Link>
             </Button>
             <Button className="w-full" variant="outline">
               View All Events

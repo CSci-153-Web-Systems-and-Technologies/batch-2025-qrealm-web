@@ -100,47 +100,60 @@ export const useEventStore = create<EventState>((set, get) => ({
   },
 
   // Create new event
+  // In stores/event-store.ts, update the createEvent method signature:
   createEvent: async (data: CreateEventData) => {
-  set({ isLoading: true, error: null })
-  
-  try {
-    const response = await fetch('/api/events', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to create event')
-    }
-
-    // Convert database event to frontend format
-    const frontendEvent = convertDatabaseEventToFrontend(result.event)
+    set({ isLoading: true, error: null })
     
-    // Update local state
-    set(state => ({ 
-      events: [frontendEvent, ...state.events],
-      currentEvent: frontendEvent,
-      isLoading: false 
-    }))
+    try {
+      const formData = new FormData()
+      
+      // Append all form fields
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (typeof value === 'boolean') {
+            formData.append(key, value.toString())
+          } else if (typeof value === 'number') {
+            formData.append(key, value.toString())
+          } else if (typeof value === 'string') {
+            // Always append strings, even empty ones
+            formData.append(key, value)
+          }
+        }
+      })
 
-    // ✅ REDIRECT TO EVENT DETAIL PAGE WITH QR CODE
-    if (result.event?.id) {
-      window.location.href = `/events/${result.event.id}`
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        body: formData, // Send as FormData, not JSON
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create event')
+      }
+
+      // Convert database event to frontend format
+      const frontendEvent = convertDatabaseEventToFrontend(result.event)
+      
+      // Update local state
+      set(state => ({ 
+        events: [frontendEvent, ...state.events],
+        currentEvent: frontendEvent,
+        isLoading: false 
+      }))
+
+      // Redirect to event detail page with QR code
+      if (result.event?.id) {
+        window.location.href = `/admin/events/${result.event.id}`
+      }
+
+      return { success: true, event: frontendEvent }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create event'
+      set({ error: errorMessage, isLoading: false })
+      return { success: false, error: errorMessage }
     }
-
-    return { success: true, event: frontendEvent }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to create event'
-    set({ error: errorMessage, isLoading: false })
-    return { success: false, error: errorMessage }
-  }
-},
-
+  },
   // Update existing event
   updateEvent: async (id: string, data: UpdateEventData) => {
     const supabase = createClient()

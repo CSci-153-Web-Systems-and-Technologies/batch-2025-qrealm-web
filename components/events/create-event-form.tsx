@@ -196,13 +196,13 @@ useEffect(() => {
         coverImage: coverImage // Pass file object
       }
       
-      console.log('📤 Data being sent to store:', createEventData)
+      console.log('Data being sent to store:', createEventData)
       
       const result = await createEvent(createEventData)
       
-      if (result.success) {
+      if (result.success && result.event) {
         console.log('Event created successfully!')
-        router.push('/admin/dashboard')
+        router.push(`/events/${result.event.id}`)
       } else {
         console.error('Failed to create event:', result.error)
         const err = result.error

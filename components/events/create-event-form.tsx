@@ -159,9 +159,6 @@ useEffect(() => {
       return
     }
 
-    // Debug: Check what data we're sending
-    console.log('Form data before submission:', data)
-
     // Ensure required fields are present
     if (!data.title?.trim()) {
       alert('Title is required')
@@ -173,31 +170,12 @@ useEffect(() => {
       return
     }
 
-    // Create FormData to handle file upload
-    const formData = new FormData()
-    
-    // Append all form fields with proper handling
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        // For string fields, ensure they're not empty strings
-        if (typeof value === 'string' && value.trim() === '') {
-          // Skip empty strings or handle as needed
-          return
-        }
-        formData.append(key, value.toString())
-      }
-    })
-
-    // Append cover image file if exists
-    if (coverImage) {
-      formData.append('cover_image_file', coverImage)
-    }
-
     try {
+      // TEMPORARY FIX: Send only the form data without coverImage
       const result = await createEvent(data as CreateEventData)
       
       if (result.success) {
-        router.push('/dashboard')
+        router.push('/admin/dashboard')
       } else {
         console.error('Failed to create event:', result.error)
         const err = result.error

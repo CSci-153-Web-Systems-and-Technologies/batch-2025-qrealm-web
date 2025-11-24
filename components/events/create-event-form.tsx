@@ -1,6 +1,7 @@
+
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -26,15 +27,23 @@ import {
   Users,
   Camera,
   Settings,
-  ChevronRight
+  ChevronRight,
+  Upload,
+  X,
+  Check,
+  Image
 } from 'lucide-react'
 
 export default function CreateEventForm() {
   const router = useRouter()
   const { createEvent, isLoading } = useEventStore()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [fileInputKey, setFileInputKey] = useState(0) // Add this key to force re-render
   
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [selectedTime, setSelectedTime] = useState('')
+  const [coverImage, setCoverImage] = useState<File | null>(null)
+  const [coverImagePreview, setCoverImagePreview] = useState<string>('')
 
   const {
     register,
@@ -53,7 +62,6 @@ export default function CreateEventForm() {
       custom_category: '',
       organizer: '',
       location: '',
-      cover_image_url: '',
       max_photos: 100,
       expected_attendees: undefined,
       allow_photo_upload: true,
@@ -66,6 +74,53 @@ export default function CreateEventForm() {
   const maxPhotos = watch('max_photos') || 100
   const allowPhotoUpload = watch('allow_photo_upload')
   const isPublic = watch('is_public')
+
+  // Updated handleChangeImage function
+  const handleChangeImage = () => {
+    // Force reset by updating the key to recreate the file input
+    setFileInputKey(prev => prev + 1);
+    // Small delay to ensure the input is recreated before clicking
+    setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 0);
+  };
+
+  // Updated handleFileSelect function
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Please upload a valid image file (JPEG, PNG, WebP, or GIF)');
+        return;
+      }
+
+      // Validate file size (5MB max)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        alert('Image must be smaller than 5MB');
+        return;
+      }
+
+      setCoverImage(file);
+      
+      // Create preview URL and revoke previous one to avoid memory leaks
+      if (coverImagePreview) {
+        URL.revokeObjectURL(coverImagePreview);
+      }
+      const previewUrl = URL.createObjectURL(file);
+      setCoverImagePreview(previewUrl);
+    }
+  };
+
+  // Updated handleRemoveCoverImage function
+  const handleRemoveCoverImage = () => {
+    setCoverImage(null);
+    setCoverImagePreview('');
+    // Also reset the file input key to clear the input
+    setFileInputKey(prev => prev + 1);
+  };
 
   const handleCategoryChange = (category: EventCategoryValue) => {
     setValue('category', category)
@@ -89,6 +144,14 @@ export default function CreateEventForm() {
     setValue(field, value === '' ? undefined : Number(value))
   }
 
+  // Add this near your other state declarations
+useEffect(() => {
+  const subscription = watch((value) => {
+    console.log('Form values:', value)
+  })
+  return () => subscription.unsubscribe()
+}, [watch])
+
   const onSubmit = async (data: CreateEventInput) => {
     const validationErrors = validateEventCategory(data as CreateEventData)
     if (validationErrors.length > 0) {
@@ -96,12 +159,55 @@ export default function CreateEventForm() {
       return
     }
 
-    const result = await createEvent(data as CreateEventData)
+    // Debug: Check what data we're sending
+    console.log('Form data before submission:', data)
+
+    // Ensure required fields are present
+    if (!data.title?.trim()) {
+      alert('Title is required')
+      return
+    }
+
+    if (!data.category) {
+      alert('Category is required')
+      return
+    }
+
+    // Create FormData to handle file upload
+    const formData = new FormData()
     
-    if (result.success) {
-      router.push('/dashboard')
-    } else {
-      console.error('Failed to create event:', result.error)
+    // Append all form fields with proper handling
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        // For string fields, ensure they're not empty strings
+        if (typeof value === 'string' && value.trim() === '') {
+          // Skip empty strings or handle as needed
+          return
+        }
+        formData.append(key, value.toString())
+      }
+    })
+
+    // Append cover image file if exists
+    if (coverImage) {
+      formData.append('cover_image_file', coverImage)
+    }
+
+    try {
+      const result = await createEvent(data as CreateEventData)
+      
+      if (result.success) {
+        router.push('/dashboard')
+      } else {
+        console.error('Failed to create event:', result.error)
+        const err = result.error
+        const errorMessage =
+          typeof err === 'string' ? err : (err && (err as any).message) ? (err as any).message : 'Unknown error'
+        alert(`Failed to create event: ${errorMessage}`)
+      }
+    } catch (error) {
+      console.error('Error creating event:', error)
+      alert('An error occurred while creating the event')
     }
   }
 
@@ -137,6 +243,124 @@ export default function CreateEventForm() {
 
         {/* Main Content - 2/3 width */}
         <div className="lg:col-span-2 !space-y-6">
+          {/* NEW: Cover Image Card - Separate at the top */}
+          <Card className='!p-4'>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Cover Image
+              </CardTitle>
+              <CardDescription className='sm:text-[8px] lg:text-sm'>
+                Upload a cover image for your event
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!coverImagePreview ? (
+                /* Upload Area - Only shows when no image is selected */
+                <div 
+                  className={`
+                    border-2 border-dashed border-gray-300 rounded-lg p-8 text-center 
+                    transition-all duration-200 ease-in-out
+                    hover:border-blue-400 hover:bg-blue-50
+                    cursor-pointer
+                  `}
+                  onClick={handleChangeImage}
+                >
+                  <div className="space-y-3">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                      <Upload className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-700">
+                      <span className="text-blue-600">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      JPEG, PNG, WebP, GIF up to 5MB • Recommended: 16:9 ratio
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Preview Area - Shows when image is uploaded */
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <Check className="h-4 w-4 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">Cover image uploaded</p>
+                        <p className="text-xs text-gray-500">Your event now has a cover image</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleChangeImage}
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                      >
+                        <Image className="h-4 w-4 mr-1" />
+                        Change
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRemoveCoverImage}
+                        className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Image Preview with Overlay */}
+                  <div className="relative rounded-lg overflow-hidden border bg-gray-50 group">
+                    <img 
+                      src={coverImagePreview} 
+                      alt="Cover preview" 
+                      className="w-full h-64 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-200 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={handleChangeImage}
+                          className="bg-white/90 hover:bg-white"
+                        >
+                          <Image className="h-4 w-4 mr-1" />
+                          Change Image
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Image Info */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center justify-between text-xs text-gray-600">
+                      <span>File: {coverImage?.name}</span>
+                      <span>Size: {(coverImage?.size && (coverImage.size / 1024 / 1024).toFixed(2))} MB</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Hidden File Input - Moved outside the conditional render */}
+              <Input
+                key={fileInputKey}
+                id="cover_image"
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                onChange={handleFileSelect}
+                ref={fileInputRef}
+                className="hidden"
+              />
+            </CardContent>
+          </Card>
+
           {/* Basic Information Card */}
           <Card className='!p-4'>
             <CardHeader>
@@ -210,9 +434,6 @@ export default function CreateEventForm() {
                     />
                     </div>
                 </div>
-
-                    
-
               </div>
 
               {selectedCategory === 'Other' && (
@@ -229,29 +450,17 @@ export default function CreateEventForm() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 !gap-4 !mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location <span className="text-red-500">*</span></Label>
-                  <Input
-                    id="location"
-                    placeholder="e.g., School Gym, Auditorium, Field"
-                    {...register('location')}
-                    className='!p-2 !text-sm !sm:text-base !lg:text-sm'
-                  />
-                  {errors.location && (
-                    <p className="text-sm text-red-600">{errors.location.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="cover_image_url">Cover Image URL</Label>
-                  <Input
-                    id="cover_image_url"
-                    placeholder="https://example.com/image.jpg"
-                    {...register('cover_image_url')}
-                    className='!p-2 !text-sm !sm:text-base !lg:text-sm'
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="location">Location <span className="text-red-500">*</span></Label>
+                <Input
+                  id="location"
+                  placeholder="e.g., School Gym, Auditorium, Field"
+                  {...register('location')}
+                  className='!p-2 !text-sm !sm:text-base !lg:text-sm'
+                />
+                {errors.location && (
+                  <p className="text-sm text-red-600">{errors.location.message}</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -341,7 +550,7 @@ export default function CreateEventForm() {
 
         {/* Sidebar - 1/3 width */}
         <div className="!space-y-6">
-          {/* Event Status Card */}
+          {/* Event Status Card - UPDATED with cover image status */}
           <Card
             className="
                 !p-6 
@@ -373,6 +582,14 @@ export default function CreateEventForm() {
                   <span className="text-sm font-medium">QR Code</span>
                   <Badge variant="outline" className="bg-blue-100 text-blue-800 !p-1">
                     Auto-generated
+                  </Badge>
+                </div>
+
+                {/* UPDATED: Cover Image Status */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Cover Image</span>
+                  <Badge variant="outline" className={coverImage ? "bg-green-100 text-green-800 !p-1" : "bg-gray-100 text-gray-800 !p-1"}>
+                    {coverImage ? 'Uploaded' : 'None'}
                   </Badge>
                 </div>
                 
@@ -434,42 +651,13 @@ export default function CreateEventForm() {
                 <p>• Event will be created as a draft</p>
                 <p>• QR code will be generated automatically</p>
                 <p>• You can edit settings after creation</p>
+                {/* UPDATED: Cover image info */}
+                <p>• Cover image will be uploaded automatically</p>
               </div>
             </CardContent>
           </Card>
-
-          {/** Requirements Card 
-          <Card>
-            <CardHeader>
-              <CardTitle>Requirements</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${watch('title') ? 'bg-green-500' : 'bg-gray-300'}`} />
-                  <span>Event title</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${selectedCategory ? 'bg-green-500' : 'bg-gray-300'}`} />
-                  <span>Event category</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${watch('location') ? 'bg-green-500' : 'bg-gray-300'}`} />
-                  <span>Event location</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${selectedDate ? 'bg-green-500' : 'bg-gray-300'}`} />
-                  <span>Event date</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          */}
         </div>
-
       </div>
-
-
     </div>
   )
 }

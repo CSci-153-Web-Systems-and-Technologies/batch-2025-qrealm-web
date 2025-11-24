@@ -1,8 +1,9 @@
 import { create } from 'zustand'
 import { createClient } from '@/utils/supabase/client'
-import type { Event, DatabaseEvent, CreateEventData, UpdateEventData, EventWithCode } from '@/types'
+import type { Event, DatabaseEvent, CreateEventData, UpdateEventData, EventWithCode, CreateEventFormData } from '@/types'
 import { convertDatabaseEventToFrontend, convertFrontendEventToDatabase } from '@/types'
 import { createEventSchema, updateEventSchema } from '@/types/event.schema'
+import { FileUploadService } from '@/lib/file-upload'
 //import { getClientIP as getClientIPUtil } from '@/lib/ip-utils'
 
 
@@ -101,29 +102,74 @@ export const useEventStore = create<EventState>((set, get) => ({
 
   // Create new event
   // In stores/event-store.ts, update the createEvent method signature:
-  createEvent: async (data: CreateEventData) => {
+  createEvent: async (data: CreateEventFormData) => {
     set({ isLoading: true, error: null })
     
     try {
+      // Upload cover image if provided
+      let coverImageUrl = ''
+      
+      if (data.coverImage) {
+        console.log('Starting cover image upload...', {
+          fileName: data.coverImage.name,
+          fileSize: data.coverImage.size,
+          fileType: data.coverImage.type
+        })
+        
+        const uploadResult = await FileUploadService.uploadCoverImage(data.coverImage)
+        
+        if (!uploadResult.success) {
+          set({ isLoading: false })
+          return { 
+            success: false, 
+            error: uploadResult.error || 'Cover image upload failed' 
+          }
+        }
+        
+        coverImageUrl = uploadResult.url || ''
+        console.log('Cover image uploaded, URL:', coverImageUrl)
+      } else {
+        console.log('bNo cover image provided, skipping upload')
+      }
+
+      // Prepare form data for API
       const formData = new FormData()
       
-      // Append all form fields
-      Object.entries(data).forEach(([key, value]) => {
+      // Append all form fields with proper null handling
+      const formFields = {
+        title: data.title,
+        category: data.category,
+        description: data.description || '',
+        event_date: data.event_date || '',
+        event_time: data.event_time || '',
+        custom_category: data.custom_category || '',
+        organizer: data.organizer || '',
+        location: data.location || '',
+        cover_image_url: coverImageUrl, // Use the uploaded image URL or empty string
+        max_photos: data.max_photos?.toString() || '100',
+        expected_attendees: data.expected_attendees?.toString() || '',
+        allow_photo_upload: data.allow_photo_upload?.toString() || 'true',
+        is_public: data.is_public?.toString() || 'true',
+      }
+
+      // Append each field to FormData
+      Object.entries(formFields).forEach(([key, value]) => {
+        // Only append if value is defined, convert everything to string
         if (value !== undefined && value !== null) {
-          if (typeof value === 'boolean') {
-            formData.append(key, value.toString())
-          } else if (typeof value === 'number') {
-            formData.append(key, value.toString())
-          } else if (typeof value === 'string') {
-            // Always append strings, even empty ones
-            formData.append(key, value)
-          }
+          formData.append(key, value.toString())
         }
       })
 
+      console.log('Sending form data to API...', {
+        ...formFields,
+        cover_image_url: coverImageUrl ? `✓ Set (${coverImageUrl.substring(0, 50)}...)` : '✗ Empty',
+        custom_category: formFields.custom_category || 'Empty string'
+      })
+
+      // Send to API with FormData
       const response = await fetch('/api/events', {
         method: 'POST',
-        body: formData, // Send as FormData, not JSON
+        body: formData,
       })
 
       const result = await response.json()
@@ -132,24 +178,26 @@ export const useEventStore = create<EventState>((set, get) => ({
         throw new Error(result.error || 'Failed to create event')
       }
 
-      // Convert database event to frontend format
+      // Convert and update state
       const frontendEvent = convertDatabaseEventToFrontend(result.event)
       
-      // Update local state
       set(state => ({ 
         events: [frontendEvent, ...state.events],
         currentEvent: frontendEvent,
         isLoading: false 
       }))
 
-      // Redirect to event detail page with QR code
+      //REDIRECT TO EVENT DETAIL PAGE WITH QR CODE
       if (result.event?.id) {
-        window.location.href = `/admin/events/${result.event.id}`
+        console.log('Event created successfully, redirecting...')
+        window.location.href = `/events/${result.event.id}`
       }
 
       return { success: true, event: frontendEvent }
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create event'
+      console.error('Event creation error:', error)
       set({ error: errorMessage, isLoading: false })
       return { success: false, error: errorMessage }
     }

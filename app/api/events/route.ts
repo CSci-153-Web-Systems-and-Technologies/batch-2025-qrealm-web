@@ -4,13 +4,37 @@ import { createClient } from "@/utils/supabase/server"
 import { convertFrontendEventToDatabase } from "@/types/event"
 import { EventQRGenerator } from '@/lib/qr-generator'
 
-
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
+    // CHANGE: Use FormData instead of JSON
+    const formData = await req.formData()
+    
+    // CHANGE: Extract all fields from FormData and convert null to empty strings
+    const eventData = {
+      title: formData.get('title') as string || '',
+      category: formData.get('category') as string || '',
+      description: formData.get('description') as string || '',
+      event_date: formData.get('event_date') as string || '',
+      event_time: formData.get('event_time') as string || '',
+      custom_category: formData.get('custom_category') as string || '', // Convert null to empty string
+      organizer: formData.get('organizer') as string || '',
+      location: formData.get('location') as string || '',
+      cover_image_url: formData.get('cover_image_url') as string || '',
+      max_photos: Number(formData.get('max_photos') || 100),
+      expected_attendees: formData.get('expected_attendees') ? Number(formData.get('expected_attendees')) : undefined,
+      allow_photo_upload: formData.get('allow_photo_upload') === 'true',
+      is_public: formData.get('is_public') === 'true',
+    }
 
-    // ✅ Zod validation
-    const parseResult = createEventSchema.safeParse(body)
+    // CHANGE: Handle file upload if you want to implement it later
+    const coverImageFile = formData.get('cover_image_file') as File | null
+    // For now, we'll keep using cover_image_url from form data
+    // You can implement file upload logic here when ready
+
+    console.log('Received form data:', eventData)
+
+    // Zod validation
+    const parseResult = createEventSchema.safeParse(eventData)
     if (!parseResult.success) {
       const errorMessages = parseResult.error.issues.map(issue => 
         `${issue.path.join('.')}: ${issue.message}`
@@ -26,7 +50,7 @@ export async function POST(req: Request) {
 
     const supabase = await createClient()
 
-    // ✅ Get authenticated user
+    // Get authenticated user
     const { data: { user }, error: userError } = await supabase.auth.getUser()
 
     if (userError) {
@@ -44,20 +68,18 @@ export async function POST(req: Request) {
       )
     }
 
-    // ✅ Convert frontend data to database format
+    // Convert frontend data to database format
     const dbData = convertFrontendEventToDatabase(validData)
     
-    // ✅ Prepare final data with user context
+    // Prepare final data with user context
     const finalData = {
       ...dbData,
       created_by: user.id,
-      // Add IP address if you want server-side IP tracking
-      // ip_address: req.headers.get('x-forwarded-for') || 'unknown'
     }
 
     console.log('Creating event with data:', finalData)
 
-    // ✅ Insert into database
+    // Insert into database
     const { data: event, error: dbError } = await supabase
       .from("events")
       .insert([finalData])
@@ -74,7 +96,8 @@ export async function POST(req: Request) {
         { status: 500 }
       )
     }
-// 🎯 CRITICAL: GENERATE QR CODE FOR THE NEW EVENT
+
+    // Generate QR code for the new event
     console.log('Generating QR code for event:', event.id)
     try {
       const { code, qrCodeUrl } = await EventQRGenerator.generateEventQRCode()
@@ -89,17 +112,14 @@ export async function POST(req: Request) {
 
       if (qrError) {
         console.error('Error saving QR code:', qrError)
-        // Don't fail the entire request if QR code fails
-        // We can regenerate QR codes later if needed
       } else {
-        console.log('✅ QR code generated successfully:', code)
+        console.log('QR code generated successfully:', code)
       }
     } catch (qrError) {
-      console.error('❌ Error generating QR code:', qrError)
-      // Continue even if QR generation fails - event is still created
+      console.error('Error generating QR code:', qrError)
     }
 
-    // ✅ Fetch the complete event with QR code
+    // Fetch the complete event with QR code
     const { data: completeEvent, error: fetchError } = await supabase
       .from('events')
       .select(`
@@ -111,14 +131,13 @@ export async function POST(req: Request) {
 
     if (fetchError) {
       console.error('Error fetching event with QR code:', fetchError)
-      // Return the original event even if fetch fails
       return NextResponse.json({ 
         success: true,
         event: event 
       }, { status: 201 })
     }
 
-    // ✅ Success response with complete event data including QR code
+    // Success response with complete event data including QR code
     return NextResponse.json({ 
       success: true,
       event: completeEvent 
@@ -133,7 +152,7 @@ export async function POST(req: Request) {
   }
 }
 
-// ✅ Add GET method to fetch events
+// GET method to fetch events
 export async function GET() {
   try {
     const supabase = await createClient()

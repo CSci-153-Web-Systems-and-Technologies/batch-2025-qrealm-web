@@ -247,7 +247,7 @@ export interface UpdateEventData {
   description?: string
   event_date?: string
   event_time?: string
-  category?: EventCategoryValue          // Frontend uses string category
+  category?: EventCategoryValue          
   custom_category?: string | null
   organizer?: string
   location?: string
@@ -260,9 +260,16 @@ export interface UpdateEventData {
 }
 
 // Extended interface for file uploads
-export interface CreateEventDataWithFile extends CreateEventData {
+export interface CreateEventFormData extends CreateEventData {
   coverImage?: File
 }
+
+export interface FileUploadResult {
+  success: boolean
+  url?: string
+  error?: string
+}
+
 
 
 // Validation schema for forms (your existing one)

@@ -259,6 +259,12 @@ export interface UpdateEventData {
   is_active?: boolean
 }
 
+// Extended interface for file uploads
+export interface CreateEventDataWithFile extends CreateEventData {
+  coverImage?: File
+}
+
+
 // Validation schema for forms (your existing one)
 export const validateEventCategory = (data: CreateEventData | UpdateEventData): string[] => {
   const errors: string[] = []

@@ -159,6 +159,23 @@ useEffect(() => {
       return
     }
 
+    // DEBUGGING
+    console.log('=== FORM SUBMISSION DEBUG ===')
+    console.log(' Form data:', data)
+    console.log(' Cover image file:', coverImage)
+    console.log(' Cover image preview URL:', coverImagePreview)
+    
+    if (coverImage) {
+      console.log('File details:', {
+        name: coverImage.name,
+        size: coverImage.size,
+        type: coverImage.type,
+        lastModified: coverImage.lastModified
+      })
+    } else {
+      console.log('No cover image file selected')
+    }
+
     // Ensure required fields are present
     if (!data.title?.trim()) {
       alert('Title is required')
@@ -171,10 +188,20 @@ useEffect(() => {
     }
 
     try {
-      // TEMPORARY FIX: Send only the form data without coverImage
-      const result = await createEvent(data as CreateEventData)
+      console.log('Starting event creation...')
+      
+      // Use the enhanced interface with file support
+      const createEventData = {
+        ...data as CreateEventData,
+        coverImage: coverImage // Pass file object
+      }
+      
+      console.log('📤 Data being sent to store:', createEventData)
+      
+      const result = await createEvent(createEventData)
       
       if (result.success) {
+        console.log('Event created successfully!')
         router.push('/admin/dashboard')
       } else {
         console.error('Failed to create event:', result.error)

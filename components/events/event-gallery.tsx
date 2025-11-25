@@ -8,11 +8,38 @@ interface EventGalleryProps {
 }
 
 export function EventGallery({ event, eventCode }: EventGalleryProps) {
+  // Use the default PNG placeholder if no cover image is provided
+  const coverImageUrl = event.cover_image_url 
+    ? event.cover_image_url 
+    : 'https://placehold.net/default.png';
+
+  console.log('Event Gallery Debug:', {
+    eventId: event.id,
+    hasCoverImage: !!event.cover_image_url,
+    coverImageUrl: coverImageUrl,
+    coverImageType: typeof event.cover_image_url
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Event Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          {/* Cover Image Section */}
+          <div className="mb-6 -mx-6 -mt-6">
+            <img 
+              src={coverImageUrl} 
+              alt={`Cover image for ${event.title}`}
+              className="w-full h-64 object-cover rounded-t-lg"
+              onError={(e) => {
+                console.error('Image failed to load:', coverImageUrl);
+                // Fallback to a different placeholder if needed
+                e.currentTarget.src = 'https://placehold.co/800x400?text=Event+Cover6';
+              }}
+              onLoad={() => console.log('Image loaded successfully:', coverImageUrl)}
+            />
+          </div>
+          
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">

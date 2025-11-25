@@ -21,7 +21,7 @@ export function EventGallery({ event, eventCode }: EventGalleryProps) {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+   <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Event Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -32,9 +32,9 @@ export function EventGallery({ event, eventCode }: EventGalleryProps) {
               alt={`Cover image for ${event.title}`}
               className="w-full h-64 object-cover rounded-t-lg"
               onError={(e) => {
-                console.error('Image failed to load:', coverImageUrl);
-                // Fallback to a different placeholder if needed
-                e.currentTarget.src = 'https://placehold.co/800x400?text=Event+Cover6';
+                console.error('Image failed to load:', coverImageUrl)
+                // Fallback to the exact placeholder if the uploaded image fails
+                e.currentTarget.src = 'https://placehold.co/default.png'
               }}
               onLoad={() => console.log('Image loaded successfully:', coverImageUrl)}
             />

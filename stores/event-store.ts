@@ -100,14 +100,12 @@ export const useEventStore = create<EventState>((set, get) => ({
     }
   },
 
-  // Create new event
-  // In stores/event-store.ts, update the createEvent method signature:
   createEvent: async (data: CreateEventFormData) => {
     set({ isLoading: true, error: null })
     
     try {
       // Upload cover image if provided
-      let coverImageUrl = ''
+      let coverImageUrl = 'https://placehold.co/default.png' // SET DEFAULT PLACEHOLDER
       
       if (data.coverImage) {
         console.log('Starting cover image upload...', {
@@ -126,10 +124,13 @@ export const useEventStore = create<EventState>((set, get) => ({
           }
         }
         
-        coverImageUrl = uploadResult.url || ''
+        // Only override the placeholder if upload was successful
+        if (uploadResult.url) {
+          coverImageUrl = uploadResult.url
+        }
         console.log('Cover image uploaded, URL:', coverImageUrl)
       } else {
-        console.log('bNo cover image provided, skipping upload')
+        console.log('No cover image provided, using default placeholder')
       }
 
       // Prepare form data for API
@@ -145,7 +146,7 @@ export const useEventStore = create<EventState>((set, get) => ({
         custom_category: data.custom_category || '',
         organizer: data.organizer || '',
         location: data.location || '',
-        cover_image_url: coverImageUrl, // Use the uploaded image URL or empty string
+        cover_image_url: coverImageUrl, // Use uploaded URL OR default placeholder
         max_photos: data.max_photos?.toString() || '100',
         expected_attendees: data.expected_attendees?.toString() || '',
         allow_photo_upload: data.allow_photo_upload?.toString() || 'true',
@@ -187,7 +188,7 @@ export const useEventStore = create<EventState>((set, get) => ({
         isLoading: false 
       }))
 
-      //REDIRECT TO EVENT DETAIL PAGE WITH QR CODE
+      // REDIRECT TO EVENT DETAIL PAGE WITH QR CODE
       if (result.event?.id) {
         console.log('Event created successfully, redirecting...')
         window.location.href = `/events/${result.event.id}`
@@ -202,6 +203,8 @@ export const useEventStore = create<EventState>((set, get) => ({
       return { success: false, error: errorMessage }
     }
   },
+
+
   // Update existing event
   updateEvent: async (id: string, data: UpdateEventData) => {
     const supabase = createClient()

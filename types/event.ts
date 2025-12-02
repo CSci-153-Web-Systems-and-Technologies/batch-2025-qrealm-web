@@ -1,3 +1,5 @@
+import type { Upload, UploadStats } from './upload'
+
 export interface DatabaseEventCategory {
   id: number
   name: string
@@ -285,4 +287,110 @@ export const validateEventCategory = (data: CreateEventData | UpdateEventData): 
   }
   
   return errors
+}
+
+// ==================== UPLOAD-RELATED EVENT TYPES ====================
+
+/**
+ * Event with upload statistics
+ */
+export interface EventWithUploadStats extends Event {
+  uploads_count?: number
+  pending_uploads_count?: number
+  upload_stats?: UploadStats
+}
+
+/**
+ * Event with associated uploads
+ */
+export interface EventWithUploads extends Event {
+  uploads?: Upload[]
+}
+
+/**
+ * Database event with uploads (for API responses)
+ */
+export interface DatabaseEventWithUploads extends DatabaseEvent {
+  uploads?: Upload[]
+}
+
+/**
+ * Event with full upload details for admin views
+ */
+export interface EventWithFullUploads extends Event {
+  uploads: Upload[]
+  upload_stats: UploadStats
+}
+
+// ==================== EVENT UPLOAD CONFIGURATION ====================
+
+/**
+ * Event upload configuration
+ */
+export interface EventUploadConfig {
+  allow_photo_upload: boolean
+  max_photos: number
+  requires_moderation: boolean
+  allow_anonymous: boolean
+  max_file_size: number
+  allowed_file_types: string[]
+}
+
+/**
+ * Event upload settings for form
+ */
+export interface EventUploadSettings {
+  allow_photo_upload: boolean
+  max_photos: number
+  enable_auto_approval: boolean
+  require_uploader_name: boolean
+}
+
+// ==================== HELPER FUNCTIONS ====================
+
+/**
+ * Type guard to check if event has upload stats
+ */
+export function hasUploadStats(event: Event | EventWithUploadStats): event is EventWithUploadStats {
+  return 'uploads_count' in event || 'upload_stats' in event
+}
+
+/**
+ * Type guard to check if event has uploads
+ */
+export function hasUploads(event: Event | EventWithUploads): event is EventWithUploads {
+  return 'uploads' in event && Array.isArray(event.uploads)
+}
+
+/**
+ * Get upload limit information for an event
+ */
+export function getEventUploadLimit(event: EventWithUploadStats): {
+  max: number
+  remaining: number
+  current: number
+} {
+  const current = event.uploads_count || 0
+  const max = event.max_photos || 100
+  return {
+    max,
+    current,
+    remaining: Math.max(0, max - current)
+  }
+}
+
+// ==================== EVENT FORM TYPES EXTENSION ====================
+
+/**
+ * Extended CreateEventData with upload settings
+ */
+export interface CreateEventDataWithUploadSettings extends CreateEventData {
+  upload_settings?: Partial<EventUploadSettings>
+}
+
+/**
+ * Extended UpdateEventData with upload settings
+ */
+export interface UpdateEventDataWithUploadSettings extends UpdateEventData {
+  upload_settings?: Partial<EventUploadSettings>
 }

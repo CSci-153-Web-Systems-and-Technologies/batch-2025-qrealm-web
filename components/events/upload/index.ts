@@ -11,6 +11,8 @@ export type { UploaderNameInputProps, UploadDropzoneProps } from './forms'
 export { UploadProgress, UploadResults } from './status'
 export type { UploadProgressProps, UploadResultsProps, UploadResult } from './status'
 
+export { PhotoGallery } from './photo-gallery'
+
 // Main form component
 export { GuestUploadForm } from './guest-upload-form'
 export type { GuestUploadFormProps } from './guest-upload-form'

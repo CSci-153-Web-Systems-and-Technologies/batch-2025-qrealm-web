@@ -1,11 +1,32 @@
-"use client"
+'use client'
 
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
-
 import { cn } from "@/lib/utils"
 
-const Tabs = TabsPrimitive.Root
+// Generate a stable ID that doesn't change between server/client
+const useStableId = (baseId: string) => {
+  const [id, setId] = React.useState<string | null>(null)
+  
+  React.useEffect(() => {
+    // Generate the same ID consistently
+    setId(baseId)
+  }, [baseId])
+  
+  return id
+}
+
+const Tabs = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Root
+    ref={ref}
+    className={cn("", className)}
+    {...props}
+  />
+))
+Tabs.displayName = TabsPrimitive.Root.displayName
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,

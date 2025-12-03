@@ -153,79 +153,79 @@ useEffect(() => {
 }, [watch])
 
   const onSubmit = async (data: CreateEventInput) => {
-  const validationErrors = validateEventCategory(data as CreateEventData)
-  if (validationErrors.length > 0) {
-    alert(validationErrors.join('\n'))
-    return
-  }
-
-  // DEBUGGING
-  console.log('=== FORM SUBMISSION DEBUG ===')
-  console.log(' Form data:', data)
-  console.log(' Cover image file:', coverImage)
-  console.log(' Cover image preview URL:', coverImagePreview)
-  
-  if (coverImage) {
-    console.log('File details:', {
-      name: coverImage.name,
-      size: coverImage.size,
-      type: coverImage.type,
-      lastModified: coverImage.lastModified
-    })
-  } else {
-    console.log('No cover image file selected')
-  }
-
-  // Ensure required fields are present
-  if (!data.title?.trim()) {
-    alert('Title is required')
-    return
-  }
-
-  if (!data.category) {
-    alert('Category is required')
-    return
-  }
-
-  try {
-    console.log('Starting event creation...')
-    
-    // Convert CreateEventInput to CreateEventFormData
-    const createEventData: CreateEventFormData = {
-      title: data.title,
-      category: data.category,
-      description: data.description,
-      event_date: data.event_date,
-      event_time: data.event_time,
-      custom_category: data.custom_category,
-      organizer: data.organizer,
-      location: data.location,
-      coverImage: coverImage ?? undefined, // Convert null to undefined
-      max_photos: data.max_photos,
-      expected_attendees: data.expected_attendees,
-      allow_photo_upload: data.allow_photo_upload,
-      is_public: data.is_public,
+    const validationErrors = validateEventCategory(data as CreateEventData)
+    if (validationErrors.length > 0) {
+      alert(validationErrors.join('\n'))
+      return
     }
+
+    // DEBUGGING
+    console.log('=== FORM SUBMISSION DEBUG ===')
+    console.log(' Form data:', data)
+    console.log(' Cover image file:', coverImage)
+    console.log(' Cover image preview URL:', coverImagePreview)
     
-    console.log('Data being sent to store:', createEventData)
-    
-    const result = await createEvent(createEventData)
-    
-    if (result.success && result.event) {
-      console.log('Event created successfully!')
-      router.push(`/events/${result.event.id}`)
+    if (coverImage) {
+      console.log('File details:', {
+        name: coverImage.name,
+        size: coverImage.size,
+        type: coverImage.type,
+        lastModified: coverImage.lastModified
+      })
     } else {
-      console.error('Failed to create event:', result.error)
-      const err = result.error
-      const errorMessage =
-        typeof err === 'string' ? err : (err && (err as any).message) ? (err as any).message : 'Unknown error'
-      alert(`Failed to create event: ${errorMessage}`)
+      console.log('No cover image file selected')
     }
-  } catch (error) {
-    console.error('Error creating event:', error)
-    alert('An error occurred while creating the event')
+
+    // Ensure required fields are present
+    if (!data.title?.trim()) {
+      alert('Title is required')
+      return
+    }
+
+    if (!data.category) {
+      alert('Category is required')
+      return
+    }
+
+    try {
+      console.log('Starting event creation...')
+      
+      // Convert CreateEventInput to CreateEventFormData
+      const createEventData: CreateEventFormData = {
+        title: data.title,
+        category: data.category,
+        description: data.description,
+        event_date: data.event_date,
+        event_time: data.event_time,
+        custom_category: data.custom_category,
+        organizer: data.organizer,
+        location: data.location,
+        coverImage: coverImage ?? undefined, // Convert null to undefined
+        max_photos: data.max_photos,
+        expected_attendees: data.expected_attendees,
+        allow_photo_upload: data.allow_photo_upload,
+        is_public: data.is_public,
+      }
+      
+      console.log('Data being sent to store:', createEventData)
+      
+      const result = await createEvent(createEventData)
+      
+      if (result.success && result.event) {
+        console.log('Event created successfully!')
+        router.push(`/events/${result.event.id}`)
+      } else {
+        console.error('Failed to create event:', result.error)
+        const err = result.error
+        const errorMessage =
+          typeof err === 'string' ? err : (err && (err as any).message) ? (err as any).message : 'Unknown error'
+        alert(`Failed to create event: ${errorMessage}`)
+      }
+    } catch (error) {
+      console.error('Error creating event:', error)
+      alert('An error occurred while creating the event')
+    }
   }
-}
 
   return (
     <div className="!w-full !min-h-screen !max-w-6xl !mx-auto !px-6 !py-8">

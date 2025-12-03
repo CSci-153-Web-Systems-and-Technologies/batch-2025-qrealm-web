@@ -1,7 +1,7 @@
-// components/events/event-gallery.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { Event } from '@/types'
 import { useEventCover } from '@/hooks/use-placeholder-image'
@@ -27,11 +27,30 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { QRCodeDisplay } from './qr-code-display'
+import { TabsProps } from '@radix-ui/react-tabs'
+
+// Dynamically import Tabs to avoid hydration mismatch
+const Tabs = dynamic(
+  () => import('@/components/ui/tabs').then(mod => mod.Tabs),
+  { ssr: false }
+)
+const TabsList = dynamic(
+  () => import('@/components/ui/tabs').then(mod => mod.TabsList),
+  { ssr: false }
+)
+const TabsTrigger = dynamic(
+  () => import('@/components/ui/tabs').then(mod => mod.TabsTrigger),
+  { ssr: false }
+)
+const TabsContent = dynamic(
+  () => import('@/components/ui/tabs').then(mod => mod.TabsContent),
+  { ssr: false }
+)
+
 
 interface EventGalleryProps {
   event: Event
@@ -569,3 +588,4 @@ export function EventGallery({ event, eventCode, isAdmin = false }: EventGallery
     </div>
   )
 }
+

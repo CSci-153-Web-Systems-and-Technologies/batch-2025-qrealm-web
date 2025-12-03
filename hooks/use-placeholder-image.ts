@@ -7,6 +7,6 @@ export const useEventCover = (coverImageUrl: string | null | undefined): string 
       return coverImageUrl
     }
     // Use the exact placeholder URL
-    return 'https://placehold.co/default.png'
+    return 'https://placehold.net/default.png'
   }, [coverImageUrl])
 }

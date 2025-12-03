@@ -105,7 +105,7 @@ export const useEventStore = create<EventState>((set, get) => ({
     
     try {
       // Upload cover image if provided
-      let coverImageUrl = 'https://placehold.co/default.png' // SET DEFAULT PLACEHOLDER
+      let coverImageUrl = 'https://placehold.net/default.png' // SET DEFAULT PLACEHOLDER
       
       if (data.coverImage) {
         console.log('Starting cover image upload...', {
@@ -221,7 +221,7 @@ export const useEventStore = create<EventState>((set, get) => ({
         // Convert frontend data to database format
       const dbData = convertFrontendEventToDatabase(parsed.data)
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('events')
         .update(dbData)
         .eq('id', id)

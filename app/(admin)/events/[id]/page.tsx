@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { QRCodeDisplay } from '@/components/events/qr-code-display'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
@@ -31,83 +31,53 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   const qrCode = event.event_codes?.[0]
 
+  const QRDisplay = QRCodeDisplay as any
+
   return (
-    <div className="container max-w-4xl mx-auto py-8">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="container mx-auto py-8">
+      {/* Simple header only */}
+      <div className="flex items-center !gap-4 !mb-6 !p-4">
         <Link href="/dashboard">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Events
           </Button>
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold">{event.title}</h1>
-          <p className="text-gray-600">Event created successfully!</p>
-        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Event Details */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-lg border p-6">
-            <h2 className="text-lg font-semibold mb-4">Event Details</h2>
-            <div className="space-y-3">
-              <div>
-                <span className="font-medium">Title:</span>
-                <p className="text-gray-600">{event.title}</p>
-              </div>
-              {event.description && (
-                <div>
-                  <span className="font-medium">Description:</span>
-                  <p className="text-gray-600">{event.description}</p>
-                </div>
-              )}
-              {event.organizer && (
-                <div>
-                  <span className="font-medium">Organizer:</span>
-                  <p className="text-gray-600">{event.organizer}</p>
-                </div>
-              )}
-              {event.location && (
-                <div>
-                  <span className="font-medium">Location:</span>
-                  <p className="text-gray-600">{event.location}</p>
-                </div>
-              )}
-              {event.event_date && (
-                <div>
-                  <span className="font-medium">Date:</span>
-                  <p className="text-gray-600">
-                    {new Date(event.event_date).toLocaleDateString()}
-                    {event.event_time && ` at ${event.event_time}`}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+      {/* QR Code Display handles everything */}
+      {qrCode ? (
+        <QRDisplay
+          qrCodeUrl={qrCode.qr_code_url!}
+          eventCode={qrCode.code}
+          eventTitle={event.title}
+          eventData={{
+            description: event.description,
+            date: event.event_date ? new Date(event.event_date).toLocaleDateString() : '',
+            time: event.event_time || '',
+            location: event.location || '',
+            organizer: event.organizer || '',
+            cover_image_url: event.cover_image_url || '',
+            allow_photo_upload: event.allow_photo_upload,
+            max_photos: event.max_photos,
+            is_public: event.is_public,
+            expected_attendees: event.expected_attendees,
+            id: event.id,
+            photosCount: event.photos_count,
+            // Add other fields as needed
+          }}
+        />
+      ) : (
+        <div className="max-w-md mx-auto bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+          <p className="text-yellow-800">QR code is being generated...</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="mt-2"
+          >
+            Refresh Page
+          </Button>
         </div>
-
-        {/* QR Code */}
-        <div>
-          {qrCode ? (
-            <QRCodeDisplay
-              qrCodeUrl={qrCode.qr_code_url!}
-              eventCode={qrCode.code}
-              eventTitle={event.title}
-            />
-          ) : (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-              <p className="text-yellow-800">QR code is being generated...</p>
-              <Button 
-                onClick={() => window.location.reload()} 
-                className="mt-2"
-              >
-                Refresh Page
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   )
 }

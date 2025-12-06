@@ -11,9 +11,7 @@ import {
   Share2,
   Printer,
   Badge,
-  Clock,
-  CalendarDays,
-  XCircle,
+  Clock
 } from "lucide-react";
 import QRCode from "qrcode";
 import { Button } from "@/components/ui/button";
@@ -28,6 +26,10 @@ import { Separator } from "@/components/ui/separator";
 import { useEventCover } from "@/hooks/use-placeholder-image";
 import { useUploadStore } from "@/stores/upload-store";
 import { EventQRGenerator } from "@/lib/qr-generator";
+
+
+
+import { formatFullDate, formatTime, isToday } from "@/lib/utils/";
 
 interface QRCodeDisplayProps {
   qrCodeUrl: string;
@@ -81,168 +83,7 @@ export function QRCodeDisplay({
   //   coverImageUrl: eventData?.cover_image_url
   // })
 
-  // Format date function similar to event-gallery.tsx
-  const formatFullDate = (dateString?: string): string => {
-    if (!dateString) return "Date not set";
-
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return "Invalid date";
-    }
-  };
-
-  const formatTime = (timeString?: string): string => {
-    if (!timeString || timeString.trim() === "") return "Time not set";
-
-    try {
-      // Handle both "HH:MM" and "HH:MM:SS" formats
-      const [hours, minutes] = timeString.split(":");
-      const hour = parseInt(hours);
-      const minute = minutes || "00";
-
-      const period = hour >= 12 ? "PM" : "AM";
-      const formattedHour = hour % 12 || 12;
-
-      return `${formattedHour}:${minute.padStart(2, "0")} ${period}`;
-    } catch (error) {
-      return "Invalid time";
-    }
-  };
-
-  const formatDateTime = (dateString?: string, timeString?: string): string => {
-    const datePart = formatFullDate(dateString);
-    const timePart = formatTime(timeString);
-
-    if (timePart === "Time not set") {
-      return datePart;
-    }
-
-    return `${datePart} at ${timePart}`;
-  };
-
-  /**
-   * Format relative time (e.g., "Tomorrow", "Next week")
-   */
-  const formatRelativeDate = (dateString?: string): string => {
-    if (!dateString) return "";
-
-    try {
-      const eventDate = new Date(dateString);
-      const today = new Date();
-      const diffTime = eventDate.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0) return "Today";
-      if (diffDays === 1) return "Tomorrow";
-      if (diffDays === -1) return "Yesterday";
-      if (diffDays > 0 && diffDays <= 7) return `In ${diffDays} days`;
-      if (diffDays < 0 && diffDays >= -7)
-        return `${Math.abs(diffDays)} days ago`;
-
-      return "";
-    } catch (error) {
-      return "";
-    }
-  };
-
-  /**
-   * Check if event is happening today
-   */
-  const isToday = (dateString?: string): boolean => {
-    if (!dateString) return false;
-
-    try {
-      const eventDate = new Date(dateString);
-      const today = new Date();
-
-      return eventDate.toDateString() === today.toDateString();
-    } catch (error) {
-      return false;
-    }
-  };
-
-  /**
-   * Get event status based on date
-   */
-  const getEventStatus = (
-    dateString?: string
-  ): { label: string; color: string; icon: React.ReactNode } => {
-    if (!dateString) {
-      return {
-        label: "No date set",
-        color: "bg-gray-100 text-gray-800",
-        icon: <CalendarDays className="h-3 w-3" />,
-      };
-    }
-
-    try {
-      const eventDate = new Date(dateString);
-      const today = new Date();
-
-      // Reset times for accurate date comparison
-      const eventDay = new Date(
-        eventDate.getFullYear(),
-        eventDate.getMonth(),
-        eventDate.getDate()
-      );
-      const todayDay = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      );
-
-      if (eventDay < todayDay) {
-        return {
-          label: "Past Event",
-          color: "bg-gray-100 text-gray-800",
-          icon: <CalendarDays className="h-3 w-3" />,
-        };
-      } else if (eventDay.getTime() === todayDay.getTime()) {
-        return {
-          label: "Happening Today",
-          color: "bg-green-100 text-green-800",
-          icon: <Clock className="h-3 w-3" />,
-        };
-      } else {
-        const diffDays = Math.ceil(
-          (eventDay.getTime() - todayDay.getTime()) / (1000 * 60 * 60 * 24)
-        );
-
-        if (diffDays <= 7) {
-          return {
-            label: "This Week",
-            color: "bg-blue-100 text-blue-800",
-            icon: <CalendarDays className="h-3 w-3" />,
-          };
-        } else if (diffDays <= 30) {
-          return {
-            label: "This Month",
-            color: "bg-purple-100 text-purple-800",
-            icon: <CalendarDays className="h-3 w-3" />,
-          };
-        } else {
-          return {
-            label: "Upcoming",
-            color: "bg-yellow-100 text-yellow-800",
-            icon: <CalendarDays className="h-3 w-3" />,
-          };
-        }
-      }
-    } catch (error) {
-      return {
-        label: "Date Error",
-        color: "bg-red-100 text-red-800",
-        icon: <XCircle className="h-3 w-3" />,
-      };
-    }
-  };
+  
 
   //const eventStatus = getEventStatus(eventData.date);
   //const relativeDate = formatRelativeDate(eventData.date);

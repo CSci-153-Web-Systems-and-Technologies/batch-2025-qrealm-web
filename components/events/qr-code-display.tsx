@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Download, QrCode, Calendar, MapPin, Users, Copy, Share2, Printer, Badge } from 'lucide-react'
+import { Download, QrCode, Calendar, MapPin, Users, Copy, Share2, Printer, Badge,  Clock, CalendarDays, CheckCircle, XCircle, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -65,15 +65,158 @@ export function QRCodeDisplay({ qrCodeUrl, eventCode, eventTitle, eventData = {}
   };
 
   // Format date function similar to event-gallery.tsx
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Not specified';
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatFullDate = (dateString?: string): string => {
+    if (!dateString) return 'Date not set';
+
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
-    })
+    });
+    } catch {
+      return 'Invalid date';
+    }
   }
+
+  const formatTime = (timeString?: string): string => {
+    if (!timeString || timeString.trim() === '') return 'Time not set';
+    
+    try {
+      // Handle both "HH:MM" and "HH:MM:SS" formats
+      const [hours, minutes] = timeString.split(':');
+      const hour = parseInt(hours);
+      const minute = minutes || '00';
+      
+      const period = hour >= 12 ? 'PM' : 'AM';
+      const formattedHour = hour % 12 || 12;
+      
+      return `${formattedHour}:${minute.padStart(2, '0')} ${period}`;
+    } catch (error) {
+      return 'Invalid time';
+    }
+  }
+
+  const formatDateTime = (dateString?: string, timeString?: string): string => {
+    const datePart = formatFullDate(dateString);
+    const timePart = formatTime(timeString);
+    
+    if (timePart === 'Time not set') {
+      return datePart;
+    }
+    
+    return `${datePart} at ${timePart}`;
+  }
+
+  /**
+   * Format relative time (e.g., "Tomorrow", "Next week")
+   */
+  const formatRelativeDate = (dateString?: string): string => {
+    if (!dateString) return '';
+    
+    try {
+      const eventDate = new Date(dateString);
+      const today = new Date();
+      const diffTime = eventDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) return 'Today';
+      if (diffDays === 1) return 'Tomorrow';
+      if (diffDays === -1) return 'Yesterday';
+      if (diffDays > 0 && diffDays <= 7) return `In ${diffDays} days`;
+      if (diffDays < 0 && diffDays >= -7) return `${Math.abs(diffDays)} days ago`;
+      
+      return '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  /**
+   * Check if event is happening today
+   */
+  const isToday = (dateString?: string): boolean => {
+    if (!dateString) return false;
+    
+    try {
+      const eventDate = new Date(dateString);
+      const today = new Date();
+      
+      return eventDate.toDateString() === today.toDateString();
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get event status based on date
+   */
+  const getEventStatus = (dateString?: string): { label: string; color: string; icon: React.ReactNode } => {
+    if (!dateString) {
+      return {
+        label: 'No date set',
+        color: 'bg-gray-100 text-gray-800',
+        icon: <CalendarDays className="h-3 w-3" />
+      };
+    }
+    
+    try {
+      const eventDate = new Date(dateString);
+      const today = new Date();
+      
+      // Reset times for accurate date comparison
+      const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+      const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      
+      if (eventDay < todayDay) {
+        return {
+          label: 'Past Event',
+          color: 'bg-gray-100 text-gray-800',
+          icon: <CalendarDays className="h-3 w-3" />
+        };
+      } else if (eventDay.getTime() === todayDay.getTime()) {
+        return {
+          label: 'Happening Today',
+          color: 'bg-green-100 text-green-800',
+          icon: <Clock className="h-3 w-3" />
+        };
+      } else {
+        const diffDays = Math.ceil((eventDay.getTime() - todayDay.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays <= 7) {
+          return {
+            label: 'This Week',
+            color: 'bg-blue-100 text-blue-800',
+            icon: <CalendarDays className="h-3 w-3" />
+          };
+        } else if (diffDays <= 30) {
+          return {
+            label: 'This Month',
+            color: 'bg-purple-100 text-purple-800',
+            icon: <CalendarDays className="h-3 w-3" />
+          };
+        } else {
+          return {
+            label: 'Upcoming',
+            color: 'bg-yellow-100 text-yellow-800',
+            icon: <CalendarDays className="h-3 w-3" />
+          };
+        }
+      }
+    } catch (error) {
+      return {
+        label: 'Date Error',
+        color: 'bg-red-100 text-red-800',
+        icon: <XCircle className="h-3 w-3" />
+      };
+    }
+  }
+
+  const eventStatus = getEventStatus(eventData.date);
+  const relativeDate = formatRelativeDate(eventData.date);
+  const isEventToday = isToday(eventData.date);
 
   const handleDownload = async () => {
     setIsDownloading(true)
@@ -185,7 +328,18 @@ export function QRCodeDisplay({ qrCodeUrl, eventCode, eventTitle, eventData = {}
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-gray-500" />
-                      <span>{eventData.date} at {eventData.time}</span>
+                      <span>{formatFullDate(eventData.date)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      <div className="flex-1">
+                        <span>{formatTime(eventData.time)}</span>
+                        {isEventToday && (
+                          <div className="text-sm text-green-600 font-medium">
+                            ⏰ Happening today!
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-gray-500" />
@@ -193,7 +347,9 @@ export function QRCodeDisplay({ qrCodeUrl, eventCode, eventTitle, eventData = {}
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-gray-500" />
-                      <span>{eventData.expected_attendees || 0} expected attendees</span>
+                      <span>Organizer: </span>
+                      <p>{eventData.organizer}</p>
+                      {/* <span>{eventData.expected_attendees || 0} expected attendees</span> */}
                     </div>
                   </div>
                 </div>
@@ -223,7 +379,6 @@ export function QRCodeDisplay({ qrCodeUrl, eventCode, eventTitle, eventData = {}
                   <div>
                     <span className="text-gray-500">Current Photos</span>
                     <p className="font-medium">
-                      {/* ✅ FIXED: Use uploads from store */}
                       {uploads.length}
                       {eventData.max_photos && ` of ${eventData.max_photos}`}
                     </p>
@@ -337,33 +492,54 @@ export function QRCodeDisplay({ qrCodeUrl, eventCode, eventTitle, eventData = {}
               </div>
             </CardContent>
           </Card>
-
-          <Card>
+          
+          {/* Future Feature */}
+          {/* <Card className="opacity-60">
             <CardHeader>
-              <CardTitle>Print Template</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                Print Template
+                <span className="text-xs font-normal bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                  Coming Soon
+                </span>
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-500">
                 Create printable flyers with QR codes for your event
               </p>
               
               <div className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full cursor-not-allowed"
+                  disabled
+                >
                   A4 Flyer Template
                 </Button>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full cursor-not-allowed"
+                  disabled
+                >
                   Table Tent Template
                 </Button>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full cursor-not-allowed"
+                  disabled
+                >
                   Business Card Template
                 </Button>
               </div>
 
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-400">
                 <p>Templates include event details and QR code for easy printing</p>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
 

@@ -30,6 +30,8 @@ import { EventQRGenerator } from "@/lib/qr-generator";
 
 
 import { formatFullDate, formatTime, isToday } from "@/lib/utils/";
+import { EventDetailCard } from "@/components/events/event-detail-card";
+import { QRInfoCard } from "@/components/events/qr-info-card";
 
 interface QRCodeDisplayProps {
   qrCodeUrl: string;
@@ -68,6 +70,15 @@ export function QRCodeDisplay({
   const { eventUploads } = useUploadStore();
 
   const uploads = eventData?.id ? eventUploads[eventData.id] || [] : [];
+
+  const { fetchEventUploads } = useUploadStore(); 
+
+  useEffect(() => {
+  if (eventData?.id) {
+    console.log('QRDisplay: Fetching uploads for event ID:', eventData.id);
+    fetchEventUploads(eventData.id);
+  }
+}, [eventData?.id, fetchEventUploads]);
 
   const showSuccessToast = (message: string) => {
     setToastMessage(message);
@@ -324,129 +335,17 @@ export function QRCodeDisplay({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Event Information */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Event Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start gap-4">
-                <img
-                  src={coverImage}
-                  alt="Preview Image"
-                  className="w-50 h-50 rounded-lg object-cover"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <h3 className="text-lg font-medium">{eventTitle}</h3>
-                    {/* <Badge className={getStatusColor(eventData.status)}>
-                      {eventData.status}
-                    </Badge> */}
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {eventData.description}
-                  </p>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-gray-500" />
-                      <span>{formatFullDate(eventData.date)}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-gray-500" />
-                      <div className="flex-1">
-                        <span>{formatTime(eventData.time)}</span>
-                        {isEventToday && (
-                          <div className="text-sm text-green-600 font-medium">
-                            Happening today!
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-gray-500" />
-                      <span>{eventData.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-gray-500" />
-                      <span>Organizer: </span>
-                      <p>{eventData.organizer}</p>
-                      {/* <span>{eventData.expected_attendees || 0} expected attendees</span> */}
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <EventDetailCard
+            eventTitle={eventTitle}
+            eventData={eventData}
+            coverImage={coverImage}
+            uploads={uploads}
+            formatFullDate={formatFullDate}
+            formatTime={formatTime}
+            isEventToday={isEventToday}
+          />
 
-              <Separator />
-
-              <div className="space-y-3">
-                <h4 className="font-medium">Upload Settings</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-500">Uploads Allowed</span>
-                    <p className="font-medium">
-                      {eventData.allow_photo_upload ? "Yes" : "No"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Max Photos</span>
-                    <p className="font-medium">{eventData.max_photos || 500}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Public Event</span>
-                    <p className="font-medium">
-                      {eventData.is_public ? "Yes" : "No"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Current Photos</span>
-                    <p className="font-medium">
-                      {uploads.length}
-                      {eventData.max_photos && ` of ${eventData.max_photos}`}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>QR Code Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium">Event Code</label>
-                  <div className="mt-1 p-3 bg-gray-50 rounded-lg">
-                    <code className="text-sm font-mono font-bold">
-                      {eventCode}
-                    </code>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">Event URL</label>
-                  <div className="mt-1 p-3 bg-gray-50 rounded-lg">
-                    <code className="text-sm break-all">
-                      /event/{eventCode}
-                    </code>
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-2">
-                <h4 className="font-medium">Instructions for Attendees</h4>
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p>• Print and display this QR code at your event</p>
-                  <p>• Guests can scan to access the photo gallery</p>
-                  <p>• Scan the QR code with your phone camera</p>
-                  <p>• Upload photos directly to the event gallery</p>
-                  <p>• Photos are processed automatically</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <QRInfoCard eventCode={eventCode} />
         </div>
 
         {/* QR Code Display and Actions */}

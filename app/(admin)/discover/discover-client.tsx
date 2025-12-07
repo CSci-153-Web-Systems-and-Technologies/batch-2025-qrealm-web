@@ -30,7 +30,7 @@ export default function DiscoverEventsClient({
   const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all')
   const [sortBy, setSortBy] = useState<'date' | 'title' | 'category'>('date')
   const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('grid')
-  const [selectedTab, setSelectedTab] = useState<'upcoming' | 'recent'>('upcoming')
+  const [selectedTab, setSelectedTab] = useState<'upcoming' | 'live' | 'recent'>('upcoming')
 
   const [showMyEventsOnly, setShowMyEventsOnly] = useState(false)
 
@@ -241,6 +241,41 @@ export default function DiscoverEventsClient({
     </div>
   )
 
+  const isEventLive = (eventDate: string | null, eventTime: string | null) => {
+    if (!eventDate) return false
+    
+    const now = new Date()
+    const eventDateTime = new Date(eventDate)
+    
+    // If event has time, parse it
+    if (eventTime) {
+      const [time, period] = eventTime.split(' ') // "7:00 PM" → ["7:00", "PM"]
+      const [hours, minutes] = time.split(':').map(Number) // "7:00" → [7, 0]
+      
+      let hour24 = hours
+      if (period === 'PM' && hours !== 12) hour24 += 12
+      if (period === 'AM' && hours === 12) hour24 = 0
+      
+      eventDateTime.setHours(hour24, minutes, 0, 0)
+    }
+    
+    // Event is live if:
+    // 1. It's today
+    // 2. Current time is within 4 hours of event start time
+    const isToday = eventDateTime.toDateString() === now.toDateString()
+    const timeDiff = Math.abs(now.getTime() - eventDateTime.getTime())
+    const hoursDiff = timeDiff / (1000 * 60 * 60)
+    
+    return isToday && hoursDiff <= 4
+  }
+
+  const liveEvents = useMemo(() => {
+    return filteredAndSortedEvents.filter(e =>
+        isEventLive(e.event_date, e.event_time)
+    )
+  }, [filteredAndSortedEvents])
+
+
   // Grid View Component
   const GridView = ({ events }: { events: typeof filteredAndSortedEvents }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -252,6 +287,16 @@ export default function DiscoverEventsClient({
           className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer bg-white"
           onClick={() => handleViewEvent(event.event_codes?.code || null)}
         >
+            {/* 👇 ADD LIVE BADGE ON IMAGE */}
+          {isEventLive(event.event_date, event.event_time) && (
+            <div className="absolute top-3 right-3 z-10">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white rounded-full text-xs font-bold shadow-lg">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                LIVE NOW
+              </span>
+            </div>
+          )}
+
               {/*  EVENT IMAGE  */}
           <div className="aspect-video bg-gray-100 overflow-hidden">
             <img 
@@ -265,6 +310,15 @@ export default function DiscoverEventsClient({
             {/* Title + Category Badge */}
             <div className="flex items-start justify-between gap-2">
               <h4 className="font-medium line-clamp-2">{event.title}</h4>
+
+              {/* 👇 ALSO ADD SMALL LIVE INDICATOR IN TITLE AREA */}
+                {isEventLive(event.event_date, event.event_time) && (
+                    <span className="inline-flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
+                    <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
+                    Live
+                    </span>
+                )}
+
               {event.event_categories && (
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   getCategoryColor(event.event_categories.name)
@@ -317,7 +371,13 @@ export default function DiscoverEventsClient({
     </div>
   )
 
-  const currentEvents = selectedTab === 'upcoming' ? upcomingEvents : recentEvents
+  const currentEvents =
+  selectedTab === "live"
+    ? liveEvents
+    : selectedTab === "upcoming"
+    ? upcomingEvents
+    : recentEvents
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -483,30 +543,46 @@ export default function DiscoverEventsClient({
         ) : (
           <div>
             {/* Tabs for Grid View */}
-            <div className="flex gap-2 mb-6 border-b border-gray-200">
-              <button
-                onClick={() => setSelectedTab('upcoming')}
-                className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
-                  selectedTab === 'upcoming'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Clock className="h-4 w-4" />
-                Upcoming ({upcomingEvents.length})
-              </button>
-              <button
-                onClick={() => setSelectedTab('recent')}
-                className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
-                  selectedTab === 'recent'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Image className="h-4 w-4" />
-                Recent ({recentEvents.length})
-              </button>
-            </div>
+            {viewMode === 'grid' && (
+                <div className="flex gap-2 mb-6 border-b border-gray-200">
+                <button
+                    onClick={() => setSelectedTab('upcoming')}
+                    className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
+                    selectedTab === 'upcoming'
+                        ? 'border-blue-600 text-blue-600'
+                        : 'border-transparent text-gray-600 hover:text-gray-900'
+                    }`}
+                >
+                    <Clock className="h-4 w-4" />
+                    Upcoming ({upcomingEvents.length})
+                </button>
+                
+                {/* 👇 ADD THIS NEW TAB */}
+                <button
+                    onClick={() => setSelectedTab('live')}
+                    className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
+                    selectedTab === 'live'
+                        ? 'border-red-600 text-red-600'
+                        : 'border-transparent text-gray-600 hover:text-gray-900'
+                    }`}
+                >
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                    Live Now ({liveEvents.length})
+                </button>
+                
+                <button
+                    onClick={() => setSelectedTab('recent')}
+                    className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
+                    selectedTab === 'recent'
+                        ? 'border-blue-600 text-blue-600'
+                        : 'border-transparent text-gray-600 hover:text-gray-900'
+                    }`}
+                >
+                    <Image className="h-4 w-4" />
+                    Recent ({recentEvents.length})
+                </button>
+                </div>
+            )}
             
             {currentEvents.length === 0 ? (
               <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
@@ -517,7 +593,9 @@ export default function DiscoverEventsClient({
             )}
           </div>
         )}
+        
       </div>
+      
     </div>
   )
 }

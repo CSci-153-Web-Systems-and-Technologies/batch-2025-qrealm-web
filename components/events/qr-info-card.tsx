@@ -39,9 +39,9 @@ export function QRInfoCard({
       <CardContent className="!space-y-4">
         <div className="!space-y-3">
           <div>
-            <label className="text-sm font-medium">Event Code</label>
-            <div className="mt-1 p-3 bg-gray-50 rounded-lg">
-              <code className="text-sm font-mono font-bold">
+            <label className="!text-sm !font-medium">Event Code</label>
+            <div className="!mt-1 !p-3 !bg-brand-50 !rounded-lg">
+              <code className="!text-sm !font-mono !font-bold">
                 {eventCode}
               </code>
             </div>
@@ -49,9 +49,9 @@ export function QRInfoCard({
 
           {showUrl && (
             <div>
-              <label className="text-sm font-medium">Event URL</label>
-              <div className="mt-1 p-3 bg-gray-50 rounded-lg">
-                <code className="text-sm break-all">
+              <label className="!text-sm !font-medium">Event URL</label>
+              <div className="!mt-1 !p-3 !bg-brand-50 !rounded-lg">
+                <code className="!text-sm !break-all">
                   {displayUrl}
                 </code>
               </div>
@@ -62,9 +62,9 @@ export function QRInfoCard({
         {showInstructions && (
           <>
             <Separator />
-            <div className="space-y-2">
-              <h4 className="font-medium">Instructions for Attendees</h4>
-              <div className="text-sm text-gray-600 space-y-1">
+            <div className="!space-y-2">
+              <h4 className="!font-medium">Instructions for Attendees</h4>
+              <div className="!text-sm !text-gray-600 !space-y-1">
                 {instructions.map((instruction, index) => (
                   <p key={index}>• {instruction}</p>
                 ))}

@@ -32,35 +32,35 @@ export function EventDetailCard({
   isEventToday,
 }: EventDetailCardProps) {
   return (
-    <Card>
+    <Card className='!p-4'>
       <CardHeader>
-        <CardTitle>Event Details</CardTitle>
+        <CardTitle className="!flex !items-center !px-2">Event Details</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="!space-y-4">
         {/* Event Header with Image */}
-        <div className="flex items-start gap-4">
+        <div className="!flex !items-start !gap-4">
           <img
             src={coverImage}
             alt="Event Cover"
             className="w-32 h-32 rounded-lg object-cover"
           />
-          <div className="flex-1">
+          <div className="!flex-1">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <h3 className="text-lg font-medium">{eventTitle}</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-gray-600 !mb-3">
               {eventData.description}
             </p>
 
             {/* Event Metadata */}
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
+            <div className="!space-y-2 !text-sm">
+              <div className="!flex !items-center !gap-2">
                 <Calendar className="h-4 w-4 text-gray-500" />
                 <span>{formatFullDate(eventData.date)}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="!flex !items-center !gap-2">
                 <Clock className="h-4 w-4 text-gray-500" />
-                <div className="flex-1">
+                <div className="!flex-1">
                   <span>{formatTime(eventData.time)}</span>
                   {isEventToday && (
                     <div className="text-sm text-green-600 font-medium">
@@ -69,11 +69,11 @@ export function EventDetailCard({
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="!flex !items-center !gap-2">
                 <MapPin className="h-4 w-4 text-gray-500" />
                 <span>{eventData.location}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="!flex !items-center !gap-2">
                 <Users className="h-4 w-4 text-gray-500" />
                 <span>Organizer: </span>
                 <p>{eventData.organizer}</p>

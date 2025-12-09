@@ -36,16 +36,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   const QRDisplay = QRCodeDisplay as any;
 
   return (
-    <div className="container mx-auto py-8">
-      {/* Header*/}
-      <div className="flex items-center !gap-4 !mb-6 !p-4">
-        <Link href="/dashboard">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Events
-          </Button>
-        </Link>
-      </div>
+    <div className="!container !mx-auto !py-8">
 
       {/* QR Code Display handles everything */}
       {qrCode ? (

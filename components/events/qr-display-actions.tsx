@@ -43,10 +43,10 @@ export function QRDisplayActions({
   onDownloadPDF,
 }: QRDisplayActionsProps) {
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="!space-y-6">
+      <Card className='!p-4'>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="!flex !items-center !gap-2">
             <QrCode className="h-5 w-5" />
             Event QR Code
           </CardTitle>
@@ -54,65 +54,66 @@ export function QRDisplayActions({
             Scan this code to access the event gallery
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="!space-y-6">
           {/* QR Code Display */}
-          <div className="text-center">
-            <div className="inline-block p-8 bg-white rounded-xl shadow-inner border">
+          <div className="!text-center">
+            <div className="!inline-block !p-8 !bg-white !rounded-xl !shadow-inner !border">
               <img
                 src={qrCodeUrl}
                 alt={`QR Code for ${eventTitle}`}
-                className="w-64 h-64 rounded-lg"
+                className="!w-64 !h-64 !rounded-lg"
               />
             </div>
           </div>
 
           {/* QR Code Actions */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="!grid !grid-cols-2 !gap-3">
             <Button
               variant="outline"
               onClick={onCopyLink}
-              className="gap-2"
+              className="!gap-2"
             >
-              <Copy className="h-4 w-4" />
+              <Copy className="!h-4 !w-4" />
               Copy Link
             </Button>
             <Button
               variant="outline"
               onClick={onShare}
-              className="gap-2"
+              className="!gap-2"
             >
-              <Share2 className="h-4 w-4" />
+              <Share2 className="!h-4 !w-4" />
               Share
             </Button>
             <Button
               variant="outline"
               onClick={() => onDownloadPNG(false)}
               disabled={isDownloading}
-              className="gap-2"
+              className="!gap-2"
             >
-              <Download className="h-4 w-4" />
+              <Download className="!h-4 !w-4" />
               {isDownloading ? "Downloading..." : "Download PNG"}
             </Button>
             <Button
               variant="outline"
               onClick={onPrint}
-              className="gap-2"
+              className="!gap-2"
             >
-              <Printer className="h-4 w-4" />
+              <Printer className="!h-4 !w-4" />
               Print
             </Button>
           </div>
 
           <Separator />
 
-          <div className="space-y-3">
-            <h4 className="font-medium">QR Code Formats</h4>
-            <div className="grid grid-cols-1 gap-2">
+          <div className="!space-y-3">
+            <h4 className="!font-medium">QR Code Formats</h4>
+            <div className="!grid !grid-cols-1 !gap-2">
               <Button
-                variant="outline"
+                variant="default"
                 size="sm"
                 onClick={() => onDownloadPNG(true)}
                 disabled={isDownloading}
+                className="bg-brand-600 hover:bg-brand-700 text-white"
               >
                 Download PNG (High Resolution)
               </Button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Download,
   QrCode,
@@ -11,7 +12,9 @@ import {
   Share2,
   Printer,
   Badge,
-  Clock
+  Clock,
+  ArrowLeft,
+  ChevronRight
 } from "lucide-react";
 import QRCode from "qrcode";
 import { Button } from "@/components/ui/button";
@@ -26,6 +29,7 @@ import { Separator } from "@/components/ui/separator";
 import { useEventCover } from "@/hooks/use-placeholder-image";
 import { useUploadStore } from "@/stores/upload-store";
 import { EventQRGenerator } from "@/lib/qr-generator";
+
 
 
 
@@ -54,13 +58,13 @@ interface QRCodeDisplayProps {
     // status?: 'live' | 'scheduled' | 'ended' | 'draft' // Status feature soon
   };
 }
-
 export function QRCodeDisplay({
   qrCodeUrl,
   eventCode,
   eventTitle,
   eventData = {},
 }: QRCodeDisplayProps) {
+  const router = useRouter();
   const [isDownloading, setIsDownloading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -79,7 +83,7 @@ export function QRCodeDisplay({
     console.log('QRDisplay: Fetching uploads for event ID:', eventData.id);
     fetchEventUploads(eventData.id);
   }
-}, [eventData?.id, fetchEventUploads]);
+  }, [eventData?.id, fetchEventUploads]);
 
   const showSuccessToast = (message: string) => {
     setToastMessage(message);
@@ -325,17 +329,44 @@ export function QRCodeDisplay({
   // };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="!max-w-6xl !mx-auto !p-6">
       {/* Toast Notification */}
       {showToast && (
-        <div className="fixed top-4 right-4 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+        <div className="fixed top-4 right-4 brand-800 text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
           {toastMessage}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Header with Breadcrumb */}
+        <div className="space-y-4 !mb-8">
+            {/* Breadcrumb Navigation */}
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => router.push('/dashboard')}
+                  className="flex items-center gap-1 p-0 h-auto hover:bg-transparent hover:text-gray-700 font-normal"
+                  >
+                  <ArrowLeft className="h-3 w-3" />
+                  <span>Dashboard</span>
+                </Button>
+                <ChevronRight className="h-3 w-3" />
+                <span className="text-gray-900 font-medium">Event</span>
+            </div>
+            
+            {/* Page Title and Description */}
+            <div>
+                <h1 className="text-2xl sm:text-3xl font-bold">Event Preview</h1>
+                <p className="text-gray-600 mt-2 text-sm sm:text-base">
+                Event details and configuration
+                </p>
+            </div>
+        </div>
+
+
+
+       <div className="!grid grid-cols-1 lg:grid-cols-2 !gap-8">
         {/* Event Information */}
-        <div className="space-y-6">
+        <div className="!space-y-6">
           <EventDetailCard
             eventTitle={eventTitle}
             eventData={eventData}
@@ -363,6 +394,8 @@ export function QRCodeDisplay({
           onDownloadPDF={downloadPDF}
         />
       </div>
+
+      
 
       <style jsx>{`
         @keyframes fade-in {

@@ -201,14 +201,6 @@ export function QRModalContent({ eventCode, eventTitle, qrCodeUrl }: QRModalCont
         </Button>
         <Button
           variant="outline"
-          onClick={handleShare}
-          className="gap-2"
-        >
-          <Share2 className="h-4 w-4" />
-          Share
-        </Button>
-        <Button
-          variant="outline"
           onClick={() => handleDownloadPNG(false)}
           disabled={isDownloading}
           className="gap-2"
@@ -216,24 +208,16 @@ export function QRModalContent({ eventCode, eventTitle, qrCodeUrl }: QRModalCont
           <Download className="h-4 w-4" />
           PNG
         </Button>
-        <Button
-          variant="outline"
-          onClick={handlePrint}
-          className="gap-2"
-        >
-          <Printer className="h-4 w-4" />
-          Print
-        </Button>
       </div>
 
       <Separator />
 
       {/* Download Options */}
       <div className="space-y-3">
-        <h4 className="font-medium flex items-center gap-2">
+        {/* <h4 className="font-medium flex items-center gap-2">
           <Smartphone className="h-4 w-4" />
           Download Formats
-        </h4>
+        </h4> */}
         <div className="grid grid-cols-1 gap-2">
           <Button
             variant="default"
@@ -242,7 +226,7 @@ export function QRModalContent({ eventCode, eventTitle, qrCodeUrl }: QRModalCont
             className="w-full justify-start gap-2"
           >
             <Download className="h-4 w-4" />
-            High Resolution PNG (1000x1000)
+            High Resolution PNG
           </Button>
           <Button
             variant="outline"

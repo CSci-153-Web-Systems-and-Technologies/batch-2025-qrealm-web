@@ -144,7 +144,8 @@ export function QRModalContent({ eventCode, eventTitle, qrCodeUrl }: QRModalCont
   }
 
   return (
-    <div className="space-y-4 sm:space-y-5 md:space-y-6 p-3 sm:p-4 md:p-5 lg:p-6">
+    <div className="space-y-4 sm:space-y-5 md:space-y-6 p-3 sm:p-4 md:p-5 lg:p-6 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700 
+  scrollbar-track-transparent">
       <CardHeader className="px-0 pt-0">
         <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
           <QrCode className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary" />

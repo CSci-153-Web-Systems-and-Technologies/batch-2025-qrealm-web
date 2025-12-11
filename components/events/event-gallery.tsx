@@ -613,7 +613,7 @@ const formatTime = formatTimeTo12HourAdvanced
 
             {/* Info Tab */}
             <TabsContent value="info">
-              <Card className="border-0 shadow-lg">
+              <Card className="border-1 shadow-lg">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
                     <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-lg">

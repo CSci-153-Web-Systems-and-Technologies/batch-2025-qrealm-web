@@ -211,9 +211,11 @@ export default function DiscoverEventsClient({
   }
 
   // 🎯 RENDER BUTTONS BASED ON OWNERSHIP & EVENT STATUS
+  // 🎯 RENDER BUTTONS BASED ON OWNERSHIP & EVENT STATUS
   const renderEventButtons = (
     event: typeof filteredAndSortedEvents[0], 
-    isUpcomingEvent: boolean
+    isUpcomingEvent: boolean,
+    isUpcomingSection: boolean = true  // Add this parameter
   ) => {
     const isOwner = event.created_by === userId
     const eventCode = event.event_codes?.code || null
@@ -229,7 +231,7 @@ export default function DiscoverEventsClient({
               e.stopPropagation()
               handleManageEvent(event.id)
             }}
-            className="flex-1"
+            className={`flex-1 ${!isUpcomingSection ? 'bg-gray-600 hover:bg-gray-700' : ''}`}
           >
             <Settings className="h-4 w-4 mr-1" />
             Manage
@@ -248,13 +250,13 @@ export default function DiscoverEventsClient({
                 }
               }}
               disabled={!eventCode}
-              className="flex-1"
+              className={`flex-1 ${!isUpcomingSection ? 'bg-gray-600 hover:bg-gray-700' : ''}`}
             >
               <Image className="h-4 w-4 mr-1" />
               View Gallery
             </Button>
             <Button
-              variant="outline"
+              variant={isUpcomingSection ? "outline" : "secondary"}
               size="sm"
               onClick={(e) => {
                 e.stopPropagation()
@@ -280,7 +282,7 @@ export default function DiscoverEventsClient({
             e.stopPropagation()
             handleGetCode(event.id)
           }}
-          className="flex-1"
+          className={`flex-1 ${!isUpcomingSection ? 'bg-gray-600 hover:bg-gray-700' : ''}`}
         >
           <QrCode className="h-4 w-4 mr-1" />
           Get Code
@@ -299,19 +301,19 @@ export default function DiscoverEventsClient({
               }
             }}
             disabled={!eventCode}
-            className="flex-1"
+            className={`flex-1 ${!isUpcomingSection ? 'bg-gray-600 hover:bg-gray-700' : ''}`}
           >
             <Image className="h-4 w-4 mr-1" />
             View Gallery
           </Button>
           <Button
-            variant="outline"
+            variant={isUpcomingSection ? "outline" : "secondary"}
             size="sm"
             onClick={(e) => {
               e.stopPropagation()
               handleGetCode(event.id)
             }}
-            className="flex-1"
+            className={`flex-1 ${!isUpcomingSection ? 'border border-gray-400' : ''}`}
           >
             <QrCode className="h-4 w-4 mr-1" />
             Get Code
@@ -353,8 +355,8 @@ export default function DiscoverEventsClient({
             <div 
               className={`flex-1 border-2 ${
               isUpcomingSection 
-                ? 'border-brand-200 bg-brand-50' 
-                : 'border-gray-200 bg-white'
+                ? 'border-brand-300 bg-brand-100/30' 
+                : 'border-gray-300 bg-gray-100/60 text-gray-600'
             } rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow`}
             >
               <div className="grid md:grid-cols-4 gap-4">
@@ -422,7 +424,7 @@ export default function DiscoverEventsClient({
                   </div>
                   
                   <div className="flex gap-2">
-                    {renderEventButtons(event, isUpcomingSection)}
+                    {renderEventButtons(event, isUpcomingSection, isUpcomingSection)}
                   </div>
                 </div>
               </div>

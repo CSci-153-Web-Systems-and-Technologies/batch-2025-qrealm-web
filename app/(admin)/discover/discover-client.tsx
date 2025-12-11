@@ -384,23 +384,23 @@ export default function DiscoverEventsClient({
                   </div>
                   
                   {/* Compact event details */}
-                  <div className="flex flex-wrap items-center !gap-2 text-sm text-gray-600 mb-4">
+                  <div className="flex flex-wrap items-center !gap-2 sm:gap-3 text-sm text-gray-600 mb-4">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4 flex-shrink-0" />
-                      <span>{formatDate(event.event_date)}</span>
+                      <span className="text-xs sm:text-sm">{formatDate(event.event_date)}</span>
                     </div>
                     
                     {event.event_time && (
                       <div className="!flex !items-center !gap-1">
                         <Clock className="h-4 w-4 flex-shrink-0" />
-                        <span>{formatTimeToUS(event.event_time)}</span>
+                        <span className="text-xs sm:text-sm">{formatTimeToUS(event.event_time)}</span>
                       </div>
                     )}
                     
                     {event.location && (
                       <div className="!flex !items-center !gap-1">
                         <MapPin className="h-4 w-4 flex-shrink-0" />
-                        <span className="max-w-[150px] truncate" title={event.location}>
+                        <span className="max-w-[30vw] sm:max-w-[150px] truncate text-xs sm:text-sm" title={event.location}>
                           {event.location}
                         </span>
                       </div>
@@ -409,7 +409,7 @@ export default function DiscoverEventsClient({
                     {event.expected_attendees && (
                       <div className="!flex !items-center !gap-1">
                         <Users className="h-4 w-4 flex-shrink-0" />
-                        <span>{event.expected_attendees}</span>
+                        <span className="text-xs sm:text-sm">{event.expected_attendees}</span>
                       </div>
                     )}
                     
@@ -446,9 +446,9 @@ export default function DiscoverEventsClient({
           >
             {/* Live Badge */}
             {isEventLive(event.event_date, event.event_time) && (
-              <div className="absolute top-3 right-3 z-10">
-                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white rounded-full text-xs font-bold shadow-lg">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10">
+                <span className="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 bg-red-500 text-white rounded-full text-xs font-bold shadow-lg">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse" />
                   LIVE NOW
                 </span>
               </div>
@@ -459,7 +459,7 @@ export default function DiscoverEventsClient({
               <img 
                 src={event.cover_image_url || '/images/placeholder-event.svg'}
                 alt={event.title}
-                className="w-full h-full object-cover hover:scale-105 transition-transform"
+                className="w-full h-32 sm:h-24 md:h-full object-cover rounded-lg"
               />
             </div>
             
@@ -493,14 +493,14 @@ export default function DiscoverEventsClient({
               {/* Compact event details - Reduced spacing */}
               <div className="!mb-3 !space-y-1">
                 {/* Date + Time on same line */}
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span className="!flex !items-center !gap-1 !flex-1">
+                <div className="flex items-center gap-2 text-xs sm:text-xs text-gray-500">
+                  <span className="!flex !items-center !gap-1 !flex-1 min-w-0">
                     <Calendar className="h-3 w-3 flex-shrink-0" />
                     <span className="truncate">{formatDate(event.event_date)}</span>
                   </span>
                   
                   {event.event_time && (
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 flex-shrink-0">
                       <Clock className="h-3 w-3 flex-shrink-0" />
                       <span>{formatTimeToUS(event.event_time)}</span>
                     </span>
@@ -508,11 +508,11 @@ export default function DiscoverEventsClient({
                 </div>
                 
                 {/* Location + Other details */}
-                <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-gray-500">
                   {event.location && (
-                    <div className="flex items-center gap-1" title={event.location}>
+                    <div className="flex items-center gap-1 min-w-0" title={event.location}>
                       <MapPin className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate max-w-[120px]">{event.location}</span>
+                      <span className="truncate max-w-[30vw] sm:max-w-[120px]">{event.location}</span>
                     </div>
                   )}
                   
@@ -554,14 +554,16 @@ export default function DiscoverEventsClient({
     <div className="min-h-screen bg-brand-50">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="bg-brand-100 p-3 rounded-lg">
-              <Sparkles className="h-6 w-6 text-brand-700" />
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <div className="bg-brand-100 p-2 sm:p-3 rounded-lg">
+              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-brand-700" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-900">Discover Events</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+              Discover Events
+            </h1>
           </div>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-600 text-sm sm:text-base max-w-md sm:max-w-lg md:max-w-2xl mx-auto px-2 sm:px-0">
             Browse all school events, from upcoming celebrations to recent highlights. Use filters to find exactly what you're looking for.
           </p>
         </div>
@@ -579,10 +581,11 @@ export default function DiscoverEventsClient({
               variant={showMyEventsOnly ? "default" : "outline"}
               size="sm"
               onClick={() => setShowMyEventsOnly(!showMyEventsOnly)}
+              className="text-xs sm:text-sm whitespace-nowrap"
             >
-              <User className="h-4 w-4 mr-1" />
+              <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               My Events Only
-              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+              <span className={`ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 rounded-full text-xs ${
                 showMyEventsOnly ? 'bg-brand-500' : 'bg-gray-200'
               }`}>
                 {myEventsCount}
@@ -590,15 +593,15 @@ export default function DiscoverEventsClient({
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <div className="relative">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
+            <div className="relative sm:col-span-2 lg:col-span-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search events..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full pl-9 sm:pl-10 pr-8 sm:pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm sm:text-base"
               />
               {searchQuery && (
                 <Button
@@ -617,7 +620,7 @@ export default function DiscoverEventsClient({
               onChange={(e) => setCategoryFilter(
                 e.target.value === 'all' ? 'all' : Number(e.target.value)
               )}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm sm:text-base"
             >
               <option value="all">All Categories</option>
               {categories.map(category => (
@@ -630,19 +633,19 @@ export default function DiscoverEventsClient({
             <select 
               value={sortBy} 
               onChange={(e) => setSortBy(e.target.value as 'date' | 'title' | 'category')}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm sm:text-base"
             >
               <option value="date">Sort by Date</option>
               <option value="title">Sort by Title</option>
               <option value="category">Sort by Category</option>
             </select>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
               <Button
                 variant={viewMode === 'timeline' ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode('timeline')}
-                className="flex-1"
+                className="flex-1 text-xs sm:text-sm"
               >
                 <List className="h-4 w-4 mr-1" />
                 Timeline
@@ -716,39 +719,39 @@ export default function DiscoverEventsClient({
               <Button
                 variant="ghost"
                 onClick={() => setSelectedTab('upcoming')}
-                className={`rounded-none border-b-2 ${
+                className={`rounded-none border-b-2 whitespace-nowrap text-xs sm:text-sm ${
                   selectedTab === 'upcoming'
                     ? 'border-brand-600 text-brand-600'
                     : 'border-transparent'
                 }`}
               >
-                <Clock className="h-4 w-4 mr-1" />
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Upcoming ({upcomingEvents.length})
               </Button>
               
               <Button
                 variant="ghost"
                 onClick={() => setSelectedTab('live')}
-                className={`rounded-none border-b-2 ${
+                className={`rounded-none border-b-2 whitespace-nowrap text-xs sm:text-sm ${
                   selectedTab === 'live'
                     ? 'border-red-600 text-red-600'
                     : 'border-transparent'
                 }`}
               >
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-1" />
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-500 rounded-full animate-pulse mr-1" />
                 Live Now ({liveEvents.length})
               </Button>
               
               <Button
                 variant="ghost"
                 onClick={() => setSelectedTab('recent')}
-                className={`rounded-none border-b-2 ${
+                className={`rounded-none border-b-2 whitespace-nowrap text-xs sm:text-sm  ${
                   selectedTab === 'recent'
                     ? 'border-brand-600 text-brand-600'
                     : 'border-transparent'
                 }`}
               >
-                <Image className="h-4 w-4 mr-1" />
+                <Image className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                 Recent ({recentEvents.length})
               </Button>
             </div>

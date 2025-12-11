@@ -25,6 +25,12 @@ import {
   QrCode,
   EyeOff,
   Edit,
+  Shield,
+  UserCircle,
+  CheckCircle,
+  Zap,
+  Lock,
+  Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -550,35 +556,38 @@ const formatTime = formatTimeTo12HourAdvanced
                       </div>
                       
                       <Separator />
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="text-center p-4">
-                          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <span className="text-lg">✅</span>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                        {/* Easy Upload */}
+                        <div className="text-center p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm hover:shadow-md transition-shadow duration-300">
+                          <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4 p-3">
+                            <Zap className="h-7 w-7 text-green-600 dark:text-green-400" />
                           </div>
-                          <h4 className="font-medium mb-1">Easy Upload</h4>
-                          <p className="text-sm text-gray-500">
-                            Drag & drop or select files
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Lightning Fast</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Drag & drop or select files instantly
                           </p>
                         </div>
-                        
-                        <div className="text-center p-4">
-                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <span className="text-lg">👤</span>
+
+                        {/* Anonymous Option */}
+                        <div className="text-center p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm hover:shadow-md transition-shadow duration-300">
+                          <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-full flex items-center justify-center mx-auto mb-4 p-3">
+                            <UserCircle className="h-7 w-7 text-blue-600 dark:text-blue-400" />
                           </div>
-                          <h4 className="font-medium mb-1">Anonymous Option</h4>
-                          <p className="text-sm text-gray-500">
-                            Upload without sharing name
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Stay Anonymous</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Upload without sharing your name
                           </p>
                         </div>
-                        
-                        <div className="text-center p-4">
-                          <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <span className="text-lg">🛡️</span>
+
+                        {/* Safe & Secure */}
+                        <div className="text-center p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm hover:shadow-md transition-shadow duration-300">
+                          <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 rounded-full flex items-center justify-center mx-auto mb-4 p-3">
+                            <Shield className="h-7 w-7 text-purple-600 dark:text-purple-400" />
                           </div>
-                          <h4 className="font-medium mb-1">Safe & Secure</h4>
-                          <p className="text-sm text-gray-500">
-                            All photos are reviewed
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Safe & Secure</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            All photos are reviewed for safety
                           </p>
                         </div>
                       </div>
@@ -604,94 +613,212 @@ const formatTime = formatTimeTo12HourAdvanced
 
             {/* Info Tab */}
             <TabsContent value="info">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Complete Event Information</CardTitle>
+              <Card className="border-0 shadow-lg">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-lg">
+                      <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                      Event Details
+                    </CardTitle>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Complete information about this event
+                  </p>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-medium text-sm text-gray-500 mb-1">Category</h4>
-                        <Badge className={getCategoryColor(event.category)}>
+                <CardContent className="space-y-8">
+                  {/* Main Event Information */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Left Column */}
+                    <div className="space-y-5">
+                      <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-gray-50/50 to-white dark:from-gray-900/50 dark:to-gray-800/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-md">
+                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">CATEGORY</span>
+                          </div>
+                        </div>
+                        <Badge className={`${getCategoryColor(event.category)} text-sm font-medium px-3 py-1.5 rounded-full`}>
                           {event.category}
                         </Badge>
                       </div>
-                      
-                      <div>
-                        <h4 className="font-medium text-sm text-gray-500 mb-1">Organizer</h4>
-                        <p className="text-lg">{event.organizer || 'Not specified'}</p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium text-sm text-gray-500 mb-1">Location</h4>
-                        <p className="text-lg">{event.location || 'Not specified'}</p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium text-sm text-gray-500 mb-1">Expected Attendees</h4>
-                        <p className="text-lg">{event.expected_attendees || 'Not specified'}</p>
+
+                      <div className="space-y-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <Users className="h-4 w-4 text-gray-400" />
+                            <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Organizer</h4>
+                          </div>
+                          <p className="text-lg font-medium text-gray-900 dark:text-gray-100 pl-6">
+                            {event.organizer || <span className="text-gray-400 italic">Not specified</span>}
+                          </p>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <MapPin className="h-4 w-4 text-gray-400" />
+                            <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Location</h4>
+                          </div>
+                          <p className="text-lg font-medium text-gray-900 dark:text-gray-100 pl-6">
+                            {event.location || <span className="text-gray-400 italic">Not specified</span>}
+                          </p>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <Users className="h-4 w-4 text-gray-400" />
+                            <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Expected Attendees</h4>
+                          </div>
+                          <p className="text-lg font-medium text-gray-900 dark:text-gray-100 pl-6">
+                            {event.expected_attendees || <span className="text-gray-400 italic">Not specified</span>}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-medium text-sm text-gray-500 mb-1">Date</h4>
-                        <p className="text-lg">
-                          {event.event_date ? formatDate(event.event_date) : 'Not specified'}
-                        </p>
+
+                    {/* Right Column */}
+                    <div className="space-y-5">
+                      <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-gray-50/50 to-white dark:from-gray-900/50 dark:to-gray-800/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-md">
+                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">DATE & TIME</span>
+                          </div>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                            <div>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Event Date</p>
+                              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                {event.event_date ? formatDate(event.event_date) : <span className="text-gray-400 italic">Not specified</span>}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Clock className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                            <div>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Event Time</p>
+                              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                {event.event_time ? formatTime(event.event_time) : <span className="text-gray-400 italic">Not specified</span>}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      
-                      <div>
-                        <h4 className="font-medium text-sm text-gray-500 mb-1">Time</h4>
-                        <p className="text-lg">{event.event_time ? formatTime(event.event_time) : 'Not specified'}</p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium text-sm text-gray-500 mb-1">Event Code</h4>
-                        <p className="text-lg font-mono bg-gray-100 px-3 py-1 rounded inline-block">
-                          {eventCode}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium text-sm text-gray-500 mb-1">Visibility</h4>
-                        <Badge variant={event.is_public ? "default" : "secondary"}>
-                          {event.is_public ? 'Public' : 'Private'}
-                        </Badge>
+
+                      <div className="space-y-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Event Code</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="font-mono text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 text-white dark:text-gray-900 px-4 py-2.5 rounded-lg tracking-wider shadow-sm">
+                              {eventCode}
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              Unique Identifier
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <EyeOff className="h-4 w-4 text-gray-400" />
+                            <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Visibility</h4>
+                          </div>
+                          <Badge 
+                            variant={event.is_public ? "default" : "secondary"}
+                            className="text-sm font-medium px-3 py-1.5 rounded-full"
+                          >
+                            {event.is_public ? (
+                              <>
+                                <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                Public Event
+                              </>
+                            ) : (
+                              <>
+                                <Lock className="h-3 w-3 mr-2" />
+                                Private Event
+                              </>
+                            )}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  
-                  <Separator />
-                  
+
+                  <Separator className="my-2" />
+
+                  {/* Upload Settings */}
                   <div>
-                    <h4 className="font-medium mb-3">Upload Settings</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">Status</p>
-                        <p className="font-medium">
-                          {event.allow_photo_upload ? 'Open' : 'Closed'}
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="p-2 bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20 rounded-lg">
+                        <Upload className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      </div>
+                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">Upload Settings</h4>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Status</p>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${event.allow_photo_upload ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+                          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            {event.allow_photo_upload ? 'Open' : 'Closed'}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Max Photos</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          {event.max_photos || <span className="text-gray-400 text-lg">∞</span>}
                         </p>
                       </div>
                       
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">Max Photos</p>
-                        <p className="font-medium">{event.max_photos}</p>
+                      <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Photos Uploaded</p>
+                        <div className="flex items-baseline gap-1">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{uploads.length}</p>
+                          {event.max_photos && (
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              / {event.max_photos}
+                            </p>
+                          )}
+                        </div>
+                        {event.max_photos && uploads.length > 0 && (
+                          <div className="mt-2">
+                            <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
+                                style={{ width: `${Math.min((uploads.length / event.max_photos) * 100, 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">Photos Uploaded</p>
-                        <p className="font-medium">{uploads.length}</p>
-                      </div>
-                      
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">Created</p>
-                        <p className="font-medium text-sm">
-                          {event.created_at 
-                            ? new Date(event.created_at).toLocaleDateString()
-                            : 'N/A'}
-                        </p>
+                      <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Created</p>
+                        <div className="space-y-1">
+                          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            {event.created_at 
+                              ? new Date(event.created_at).toLocaleDateString('en-US', { 
+                                  month: 'short', 
+                                  day: 'numeric', 
+                                  year: 'numeric' 
+                                })
+                              : 'N/A'}
+                          </p>
+                          {event.created_at && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {new Date(event.created_at).toLocaleTimeString('en-US', { 
+                                hour: 'numeric', 
+                                minute: '2-digit' 
+                              })}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

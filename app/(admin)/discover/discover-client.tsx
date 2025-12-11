@@ -1,11 +1,12 @@
+//app/(admin)/discover/discovery-client.tsx:
+
 'use client'
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   Calendar, Search, Filter, Grid, List, Clock, Image, 
-  MapPin, Users, QrCode, X, Sparkles, 
-  User
+  MapPin, Users, QrCode, X, Sparkles, User, Settings
 } from 'lucide-react'
 import type { DatabaseEvent } from '@/types/event'
 
@@ -31,10 +32,7 @@ export default function DiscoverEventsClient({
   const [sortBy, setSortBy] = useState<'date' | 'title' | 'category'>('date')
   const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('grid')
   const [selectedTab, setSelectedTab] = useState<'upcoming' | 'live' | 'recent'>('upcoming')
-
   const [showMyEventsOnly, setShowMyEventsOnly] = useState(false)
-
-  
 
   // Helper: Format date
   const formatDate = (dateString: string | null) => {
@@ -62,18 +60,54 @@ export default function DiscoverEventsClient({
     if (!categoryName) return 'bg-gray-100 text-gray-800'
     
     const colors: Record<string, string> = {
-      Academic: 'bg-blue-100 text-blue-800',
-      Cultural: 'bg-purple-100 text-purple-800',
-      Sports: 'bg-green-100 text-green-800',
-      General: 'bg-gray-100 text-gray-800',
-    }
+    Academic: 'bg-blue-100 text-blue-800',
+    Academics: 'bg-blue-100 text-blue-800', // Alternative for Academic
+    Sports: 'bg-green-100 text-green-800',
+    Arts: 'bg-rose-100 text-rose-800',
+    Music: 'bg-pink-100 text-pink-800',
+    Theater: 'bg-fuchsia-100 text-fuchsia-800',
+    Cultural: 'bg-purple-100 text-purple-800',
+    Community: 'bg-orange-100 text-orange-800',
+    Fundraiser: 'bg-red-100 text-red-800',
+    'Field Trip': 'bg-amber-100 text-amber-800',
+    Assembly: 'bg-yellow-100 text-yellow-800',
+    Graduation: 'bg-indigo-100 text-indigo-800',
+    Holiday: 'bg-cyan-100 text-cyan-800',
+    Other: 'bg-gray-100 text-gray-800',
+    General: 'bg-gray-100 text-gray-800',
+  };
     return colors[categoryName] || 'bg-gray-100 text-gray-800'
   }
 
   // Helper: Check if event is upcoming or past
   const isUpcoming = (eventDate: string | null) => {
-    if (!eventDate) return true // If no date, show in upcoming
+    if (!eventDate) return true
     return new Date(eventDate) >= new Date()
+  }
+
+  // Helper: Check if event is live
+  const isEventLive = (eventDate: string | null, eventTime: string | null) => {
+    if (!eventDate) return false
+    
+    const now = new Date()
+    const eventDateTime = new Date(eventDate)
+    
+    if (eventTime) {
+      const [time, period] = eventTime.split(' ')
+      const [hours, minutes] = time.split(':').map(Number)
+      
+      let hour24 = hours
+      if (period === 'PM' && hours !== 12) hour24 += 12
+      if (period === 'AM' && hours === 12) hour24 = 0
+      
+      eventDateTime.setHours(hour24, minutes, 0, 0)
+    }
+    
+    const isToday = eventDateTime.toDateString() === now.toDateString()
+    const timeDiff = Math.abs(now.getTime() - eventDateTime.getTime())
+    const hoursDiff = timeDiff / (1000 * 60 * 60)
+    
+    return isToday && hoursDiff <= 4
   }
 
   // Filter and sort events
@@ -113,15 +147,138 @@ export default function DiscoverEventsClient({
     return filtered
   }, [initialEvents, searchQuery, categoryFilter, sortBy, showMyEventsOnly, userId])
   
-  // Separate upcoming and recent events
+  // Separate events by status
   const upcomingEvents = filteredAndSortedEvents.filter(e => isUpcoming(e.event_date))
   const recentEvents = filteredAndSortedEvents.filter(e => !isUpcoming(e.event_date))
+  const liveEvents = useMemo(() => {
+    return filteredAndSortedEvents.filter(e => isEventLive(e.event_date, e.event_time))
+  }, [filteredAndSortedEvents])
+  
   const myEventsCount = initialEvents.filter(e => e.created_by === userId).length
 
-  // Navigate to event details
-  const handleViewEvent = (eventCode: string | null) => {
+  // Navigate to event gallery
+  const handleViewGallery = (eventCode: string | null | undefined) => {
     if (eventCode) {
       router.push(`/event/${eventCode}`)
+    }
+  }
+
+  // Navigate to event details (for getting QR code)
+  const handleGetCode = (eventId: string) => {
+    router.push(`/events/${eventId}`)
+  }
+
+  // Navigate to manage event
+  const handleManageEvent = (eventId: string) => {
+    router.push(`/events/${eventId}`)
+  }
+
+  // 🎯 RENDER BUTTONS BASED ON OWNERSHIP & EVENT STATUS
+  const renderEventButtons = (
+    event: typeof filteredAndSortedEvents[0], 
+    isUpcomingEvent: boolean
+  ) => {
+    const isOwner = event.created_by === userId
+    const eventCode = event.event_codes?.code || null
+
+    // 👤 OWNER BUTTONS
+    if (isOwner) {
+      if (isUpcomingEvent) {
+        // Owner + Upcoming = Only "Manage"
+        return (
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleManageEvent(event.id)
+            }}
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-1 hover:bg-blue-700 transition-colors"
+          >
+            <Settings className="h-4 w-4" />
+            Manage
+          </button>
+        )
+      } else {
+        // Owner + Recent = "View Gallery" + "Manage"
+        return (
+          <>
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                if (eventCode) {
+                  handleViewGallery(eventCode)
+                }
+              }}
+              disabled={!eventCode}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-1 hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Image className="h-4 w-4" />
+              View Gallery
+            </button>
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleManageEvent(event.id)
+              }}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium flex items-center justify-center gap-1 hover:bg-gray-50 transition-colors"
+            >
+              <Settings className="h-4 w-4" />
+              Manage
+            </button>
+          </>
+        )
+      }
+    }
+
+    // 👥 NON-OWNER BUTTONS
+    if (isUpcomingEvent) {
+      // Non-owner + Upcoming = Only "Get Code"
+      return (
+        <button 
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleGetCode(event.id)
+          }}
+          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-1 hover:bg-blue-700 transition-colors"
+        >
+          <QrCode className="h-4 w-4" />
+          Get Code
+        </button>
+      )
+    } else {
+      // Non-owner + Recent = "View Gallery" + "Get Code"
+      return (
+        <>
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (eventCode) {
+                handleViewGallery(eventCode)
+              }
+            }}
+            disabled={!eventCode}
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-1 hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Image className="h-4 w-4" />
+            View Gallery
+          </button>
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleGetCode(event.id)
+            }}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium flex items-center justify-center gap-1 hover:bg-gray-50 transition-colors"
+          >
+            <QrCode className="h-4 w-4" />
+            Get Code
+          </button>
+        </>
+      )
     }
   }
 
@@ -154,12 +311,12 @@ export default function DiscoverEventsClient({
               </div>
             </div>
             
-            <div className={`flex-1 border-2 ${
+            <div 
+              className={`flex-1 border-2 ${
               isUpcomingSection 
                 ? 'border-blue-200 bg-blue-50' 
                 : 'border-gray-200 bg-white'
-            } rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
-              onClick={() => handleViewEvent(event.event_codes?.code || null)}
+            } rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow`}
             >
               <div className="grid md:grid-cols-4 gap-4">
                 <div className="md:col-span-1">
@@ -213,24 +370,7 @@ export default function DiscoverEventsClient({
                   </div>
                   
                   <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleViewEvent(event.event_codes?.code || null)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center gap-1 hover:bg-blue-700 transition-colors"
-                    >
-                      <Image className="h-4 w-4" />
-                      View Gallery
-                    </button>
-                    {event.created_by === userId && (
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          router.push(`/events/${event.id}`)
-                        }}
-                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-                      >
-                        Manage
-                      </button>
-                    )}
+                    {renderEventButtons(event, isUpcomingSection)}
                   </div>
                 </div>
               </div>
@@ -241,168 +381,116 @@ export default function DiscoverEventsClient({
     </div>
   )
 
-  const isEventLive = (eventDate: string | null, eventTime: string | null) => {
-    if (!eventDate) return false
-    
-    const now = new Date()
-    const eventDateTime = new Date(eventDate)
-    
-    // If event has time, parse it
-    if (eventTime) {
-      const [time, period] = eventTime.split(' ') // "7:00 PM" → ["7:00", "PM"]
-      const [hours, minutes] = time.split(':').map(Number) // "7:00" → [7, 0]
-      
-      let hour24 = hours
-      if (period === 'PM' && hours !== 12) hour24 += 12
-      if (period === 'AM' && hours === 12) hour24 = 0
-      
-      eventDateTime.setHours(hour24, minutes, 0, 0)
-    }
-    
-    // Event is live if:
-    // 1. It's today
-    // 2. Current time is within 4 hours of event start time
-    const isToday = eventDateTime.toDateString() === now.toDateString()
-    const timeDiff = Math.abs(now.getTime() - eventDateTime.getTime())
-    const hoursDiff = timeDiff / (1000 * 60 * 60)
-    
-    return isToday && hoursDiff <= 4
-  }
-
-  const liveEvents = useMemo(() => {
-    return filteredAndSortedEvents.filter(e =>
-        isEventLive(e.event_date, e.event_time)
-    )
-  }, [filteredAndSortedEvents])
-
-
   // Grid View Component
   const GridView = ({ events }: { events: typeof filteredAndSortedEvents }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {events.map(event => (
-
-        //  {/*  THIS IS THE EVENT CARD  */}
-        <div 
-          key={event.id} 
-          className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer bg-white"
-          onClick={() => handleViewEvent(event.event_codes?.code || null)}
-        >
-            {/* 👇 ADD LIVE BADGE ON IMAGE */}
-          {isEventLive(event.event_date, event.event_time) && (
-            <div className="absolute top-3 right-3 z-10">
-              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white rounded-full text-xs font-bold shadow-lg">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                LIVE NOW
-              </span>
-            </div>
-          )}
-
-              {/*  EVENT IMAGE  */}
-          <div className="aspect-video bg-gray-100 overflow-hidden">
-            <img 
-              src={event.cover_image_url || '/images/placeholder-event.svg'}
-              alt={event.title}
-              className="w-full h-full object-cover hover:scale-105 transition-transform"
-            />
-          </div>
-            {/* Card Content */}
-          <div className="p-4 space-y-3">
-            {/* Title + Category Badge */}
-            <div className="flex items-start justify-between gap-2">
-              <h4 className="font-medium line-clamp-2">{event.title}</h4>
-
-              {/* 👇 ALSO ADD SMALL LIVE INDICATOR IN TITLE AREA */}
-                {isEventLive(event.event_date, event.event_time) && (
-                    <span className="inline-flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
-                    <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
-                    Live
-                    </span>
-                )}
-
-              {event.event_categories && (
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  getCategoryColor(event.event_categories.name)
-                } whitespace-nowrap`}>
-                  {event.event_categories.name}
+      {events.map(event => {
+        const isUpcomingEvent = isUpcoming(event.event_date)
+        
+        return (
+          <div 
+            key={event.id} 
+            className="relative border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white"
+          >
+            {/* Live Badge */}
+            {isEventLive(event.event_date, event.event_time) && (
+              <div className="absolute top-3 right-3 z-10">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white rounded-full text-xs font-bold shadow-lg">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  LIVE NOW
                 </span>
-              )}
+              </div>
+            )}
+
+            {/* Event Image */}
+            <div className="aspect-video bg-gray-100 overflow-hidden">
+              <img 
+                src={event.cover_image_url || '/images/placeholder-event.svg'}
+                alt={event.title}
+                className="w-full h-full object-cover hover:scale-105 transition-transform"
+              />
             </div>
             
-            <p className="text-sm text-gray-600 line-clamp-2">
-              {event.description || 'No description available'}
-            </p>
+            {/* Card Content */}
+            <div className="p-4 space-y-3">
+              {/* Title + Category + Live Indicator */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <h4 className="font-medium line-clamp-2">{event.title}</h4>
+                  {isEventLive(event.event_date, event.event_time) && (
+                    <span className="inline-flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
+                      <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
+                      Live
+                    </span>
+                  )}
+                </div>
+                
+                {event.event_categories && (
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    getCategoryColor(event.event_categories.name)
+                  } whitespace-nowrap`}>
+                    {event.event_categories.name}
+                  </span>
+                )}
+              </div>
+              
+              <p className="text-sm text-gray-600 line-clamp-2">
+                {event.description || 'No description available'}
+              </p>
 
-
-             {/* Date + Time */}
-
-            <div className="flex items-center gap-3 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {formatDate(event.event_date)}
-              </span>
-              {event.event_time && <span>{event.event_time}</span>}
-            </div>
-            
-            <div className="flex gap-2 pt-2">
-              <button 
-                className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                onClick={() => handleViewEvent(event.event_codes?.code || null)}
-              >
-                View Gallery
-              </button>
-
-              {/* Manage Button for Creator */}
-
-              {event.created_by === userId && (
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation()  // Don't trigger card click
-                    router.push(`/events/${event.id}`)
-                  }}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50"
-                >
-                  Manage
-                </button>
-              )}
+              {/* Date + Time */}
+              <div className="flex items-center gap-3 text-xs text-gray-500">
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {formatDate(event.event_date)}
+                </span>
+                {event.event_time && <span>{event.event_time}</span>}
+              </div>
+              
+              {/* Buttons */}
+              <div className="flex gap-2 pt-2">
+                {renderEventButtons(event, isUpcomingEvent)}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 
   const currentEvents =
-  selectedTab === "live"
-    ? liveEvents
-    : selectedTab === "upcoming"
-    ? upcomingEvents
-    : recentEvents
-
+    selectedTab === "live"
+      ? liveEvents
+      : selectedTab === "upcoming"
+      ? upcomingEvents
+      : recentEvents
 
   return (
-    <div className="!min-h-screen !bg-gray-50">
-      <div className="!container !mx-auto px-4 !py-8 !max-w-7xl">
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="!text-center !mb-8">
-          <div className="!flex !items-center !justify-center !gap-3 !mb-4">
-            <div className="!bg-blue-100 !p-3 !rounded-lg">
-              <Sparkles className="!h-6 !w-6 !text-blue-600" />
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="bg-blue-100 p-3 rounded-lg">
+              <Sparkles className="h-6 w-6 text-blue-600" />
             </div>
-            <h1 className="!text-4xl !font-bold !text-gray-900">Discover Events</h1>
+            <h1 className="text-4xl font-bold text-gray-900">Discover Events</h1>
           </div>
-          <p className="!text-gray-600 !max-w-2xl !mx-auto">
+          <p className="text-gray-600 max-w-2xl mx-auto">
             Explore all public events. Browse upcoming celebrations and recent highlights.
           </p>
         </div>
 
         {/* Filters and Controls */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Filter className="h-5 w-5 text-gray-600" />
-            <h3 className="font-semibold text-lg">Filters & Search</h3>
-          </div>
-
-          <button
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-gray-600" />
+              <h3 className="font-semibold text-lg">Filters & Search</h3>
+            </div>
+            
+            {/* My Events Toggle */}
+            <button
               onClick={() => setShowMyEventsOnly(!showMyEventsOnly)}
               className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors ${
                 showMyEventsOnly
@@ -418,6 +506,7 @@ export default function DiscoverEventsClient({
                 {myEventsCount}
               </span>
             </button>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div className="relative">
@@ -543,46 +632,43 @@ export default function DiscoverEventsClient({
         ) : (
           <div>
             {/* Tabs for Grid View */}
-            {viewMode === 'grid' && (
-                <div className="flex gap-2 mb-6 border-b border-gray-200">
-                <button
-                    onClick={() => setSelectedTab('upcoming')}
-                    className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
-                    selectedTab === 'upcoming'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
-                >
-                    <Clock className="h-4 w-4" />
-                    Upcoming ({upcomingEvents.length})
-                </button>
-                
-                {/* 👇 ADD THIS NEW TAB */}
-                <button
-                    onClick={() => setSelectedTab('live')}
-                    className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
-                    selectedTab === 'live'
-                        ? 'border-red-600 text-red-600'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
-                >
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    Live Now ({liveEvents.length})
-                </button>
-                
-                <button
-                    onClick={() => setSelectedTab('recent')}
-                    className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
-                    selectedTab === 'recent'
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
-                >
-                    <Image className="h-4 w-4" />
-                    Recent ({recentEvents.length})
-                </button>
-                </div>
-            )}
+            <div className="flex gap-2 mb-6 border-b border-gray-200">
+              <button
+                onClick={() => setSelectedTab('upcoming')}
+                className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
+                  selectedTab === 'upcoming'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Clock className="h-4 w-4" />
+                Upcoming ({upcomingEvents.length})
+              </button>
+              
+              <button
+                onClick={() => setSelectedTab('live')}
+                className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
+                  selectedTab === 'live'
+                    ? 'border-red-600 text-red-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                Live Now ({liveEvents.length})
+              </button>
+              
+              <button
+                onClick={() => setSelectedTab('recent')}
+                className={`px-4 py-2 font-medium flex items-center gap-2 border-b-2 transition-colors ${
+                  selectedTab === 'recent'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Image className="h-4 w-4" />
+                Recent ({recentEvents.length})
+              </button>
+            </div>
             
             {currentEvents.length === 0 ? (
               <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
@@ -593,9 +679,7 @@ export default function DiscoverEventsClient({
             )}
           </div>
         )}
-        
       </div>
-      
     </div>
   )
 }

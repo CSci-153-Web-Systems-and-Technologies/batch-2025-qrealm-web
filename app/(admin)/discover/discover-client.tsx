@@ -56,6 +56,41 @@ export default function DiscoverEventsClient({
     })
   }
 
+  // Helper: Convert military time to US format (12-hour with AM/PM)
+  const formatTimeToUS = (timeString: string | null): string => {
+    if (!timeString) return 'Time TBA'
+    
+    // Remove any whitespace
+    const time = timeString.trim()
+    
+    // If already in AM/PM format, return as is
+    if (time.includes('AM') || time.includes('PM')) {
+      return time
+    }
+    
+    // Handle military time format (HH:MM or HH:MM:SS)
+    const timeMatch = time.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/)
+    if (!timeMatch) {
+      return time // Return as is if format is unexpected
+    }
+    
+    let [_, hoursStr, minutes] = timeMatch
+    let hours = parseInt(hoursStr, 10)
+    
+    // Determine AM/PM
+    const period = hours >= 12 ? 'PM' : 'AM'
+    
+    // Convert to 12-hour format
+    if (hours === 0) {
+      hours = 12 // 00:00 becomes 12:00 AM
+    } else if (hours > 12) {
+      hours = hours - 12
+    }
+    
+    // Return formatted time (e.g., "7:30 PM")
+    return `${hours}:${minutes} ${period}`
+  }
+
   // Helper: Get category color
   const getCategoryColor = (categoryName: string | null) => {
     if (!categoryName) return 'bg-gray-100 text-gray-800'
@@ -94,7 +129,8 @@ export default function DiscoverEventsClient({
     const eventDateTime = new Date(eventDate)
     
     if (eventTime) {
-      const [time, period] = eventTime.split(' ')
+      const formattedTime = formatTimeToUS(eventTime)
+      const [time, period] = formattedTime.split(' ')
       const [hours, minutes] = time.split(':').map(Number)
       
       let hour24 = hours
@@ -355,7 +391,7 @@ export default function DiscoverEventsClient({
                     {event.event_time && (
                       <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        {event.event_time}
+                        {formatTimeToUS(event.event_time)}
                       </div>
                     )}
                     {event.location && (
@@ -447,7 +483,7 @@ export default function DiscoverEventsClient({
                   <Calendar className="h-3 w-3" />
                   {formatDate(event.event_date)}
                 </span>
-                {event.event_time && <span>{event.event_time}</span>}
+                {event.event_time && <span>{formatTimeToUS(event.event_time)}</span>}
               </div>
               
               {/* Buttons */}

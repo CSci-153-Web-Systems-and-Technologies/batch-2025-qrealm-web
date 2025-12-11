@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   Calendar, Search, Filter, Grid, List, Clock, Image, 
-  MapPin, Users, QrCode, X, Sparkles, User, Settings
+  MapPin, Users, QrCode, X, Sparkles, User, Settings, Eye
 } from 'lucide-react'
 import type { DatabaseEvent } from '@/types/event'
 import { Button } from "@/components/ui/button"
@@ -368,14 +368,14 @@ export default function DiscoverEventsClient({
                 
                 <div className="md:col-span-3">
                   <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
-                    <div>
-                      <h4 className="font-semibold text-lg mb-1">{event.title}</h4>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-lg mb-1 line-clamp-1">{event.title}</h4>
                       <p className="text-sm text-gray-600 line-clamp-2">
                         {event.description || 'No description available'}
                       </p>
                     </div>
                     {event.event_categories && (
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                         getCategoryColor(event.event_categories.name)
                       }`}>
                         {event.event_categories.name}
@@ -383,27 +383,40 @@ export default function DiscoverEventsClient({
                     )}
                   </div>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-gray-600 mb-4">
+                  {/* Compact event details */}
+                  <div className="flex flex-wrap items-center !gap-2 text-sm text-gray-600 mb-4">
                     <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {formatDate(event.event_date)}
+                      <Calendar className="h-4 w-4 flex-shrink-0" />
+                      <span>{formatDate(event.event_date)}</span>
                     </div>
+                    
                     {event.event_time && (
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {formatTimeToUS(event.event_time)}
+                      <div className="!flex !items-center !gap-1">
+                        <Clock className="h-4 w-4 flex-shrink-0" />
+                        <span>{formatTimeToUS(event.event_time)}</span>
                       </div>
                     )}
+                    
                     {event.location && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        {event.location}
+                      <div className="!flex !items-center !gap-1">
+                        <MapPin className="h-4 w-4 flex-shrink-0" />
+                        <span className="max-w-[150px] truncate" title={event.location}>
+                          {event.location}
+                        </span>
                       </div>
                     )}
+                    
                     {event.expected_attendees && (
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        {event.expected_attendees} expected
+                      <div className="!flex !items-center !gap-1">
+                        <Users className="h-4 w-4 flex-shrink-0" />
+                        <span>{event.expected_attendees}</span>
+                      </div>
+                    )}
+                    
+                    {!event.is_public && (
+                      <div className="!flex !items-center !gap-1 text-amber-600">
+                        <Eye className="h-4 w-4 flex-shrink-0" />
+                        <span className="text-xs">Private</span>
                       </div>
                     )}
                   </div>
@@ -429,7 +442,7 @@ export default function DiscoverEventsClient({
         return (
           <div 
             key={event.id} 
-            className="relative border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white"
+            className="relative border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow bg-white flex flex-col h-full"
           >
             {/* Live Badge */}
             {isEventLive(event.event_date, event.event_time) && (
@@ -442,7 +455,7 @@ export default function DiscoverEventsClient({
             )}
 
             {/* Event Image */}
-            <div className="aspect-video bg-gray-100 overflow-hidden">
+            <div className="aspect-video bg-gray-100 overflow-hidden flex-shrink-0">
               <img 
                 src={event.cover_image_url || '/images/placeholder-event.svg'}
                 alt={event.title}
@@ -451,13 +464,13 @@ export default function DiscoverEventsClient({
             </div>
             
             {/* Card Content */}
-            <div className="p-4 space-y-3">
+            <div className="p-4 flex flex-col flex-1">
               {/* Title + Category + Live Indicator */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1">
-                  <h4 className="font-medium line-clamp-2">{event.title}</h4>
+              <div className="!flex !items-start !justify-between !gap-2 !mb-2">
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium line-clamp-2 mb-1">{event.title}</h4>
                   {isEventLive(event.event_date, event.event_time) && (
-                    <span className="inline-flex items-center gap-1 mt-1 text-xs text-red-600 font-medium">
+                    <span className="inline-flex items-center gap-1 text-xs text-red-600 font-medium">
                       <div className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse" />
                       Live
                     </span>
@@ -465,29 +478,62 @@ export default function DiscoverEventsClient({
                 </div>
                 
                 {event.event_categories && (
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 ${
                     getCategoryColor(event.event_categories.name)
-                  } whitespace-nowrap`}>
+                  }`}>
                     {event.event_categories.name}
                   </span>
                 )}
               </div>
               
-              <p className="text-sm text-gray-600 line-clamp-2">
+              <p className="text-sm text-gray-600 line-clamp-2 mb-3 flex-1">
                 {event.description || 'No description available'}
               </p>
 
-              {/* Date + Time */}
-              <div className="flex items-center gap-3 text-xs text-gray-500">
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {formatDate(event.event_date)}
-                </span>
-                {event.event_time && <span>{formatTimeToUS(event.event_time)}</span>}
+              {/* Compact event details - Reduced spacing */}
+              <div className="!mb-3 !space-y-1">
+                {/* Date + Time on same line */}
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <span className="!flex !items-center !gap-1 !flex-1">
+                    <Calendar className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">{formatDate(event.event_date)}</span>
+                  </span>
+                  
+                  {event.event_time && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3 flex-shrink-0" />
+                      <span>{formatTimeToUS(event.event_time)}</span>
+                    </span>
+                  )}
+                </div>
+                
+                {/* Location + Other details */}
+                <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                  {event.location && (
+                    <div className="flex items-center gap-1" title={event.location}>
+                      <MapPin className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate max-w-[120px]">{event.location}</span>
+                    </div>
+                  )}
+                  
+                  {event.expected_attendees && (
+                    <div className="flex items-center gap-1">
+                      <Users className="h-3 w-3 flex-shrink-0" />
+                      <span>{event.expected_attendees}</span>
+                    </div>
+                  )}
+                  
+                  {!event.is_public && (
+                    <div className="flex items-center gap-1 text-amber-600">
+                      <Eye className="h-3 w-3 flex-shrink-0" />
+                      <span className="text-xs">Private</span>
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* Buttons */}
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 mt-auto">
                 {renderEventButtons(event, isUpcomingEvent)}
               </div>
             </div>

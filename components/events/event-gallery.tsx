@@ -24,13 +24,14 @@ import {
   Share2,
   QrCode,
   EyeOff,
-  Edit
+  Edit,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { QRCodeDisplay } from './qr-code-display'
+import { QRModal } from '@/components/events/qr-modal'
+import { createClient } from '@/utils/supabase/client'
 
 // Dynamically import Tabs to avoid hydration mismatch
 const Tabs = dynamic(
@@ -54,14 +55,17 @@ interface EventGalleryProps {
   event: Event
   eventCode: string
   isAdmin?: boolean
+  qrCodeUrl?: string
 }
 
-export function EventGallery({ event, eventCode, isAdmin = false }: EventGalleryProps) {
+export function EventGallery({ event, eventCode, isAdmin = false, qrCodeUrl }: EventGalleryProps) {
   const router = useRouter()
+  const supabase = createClient()
   const coverImage = useEventCover(event.cover_image_url)
   const [activeTab, setActiveTab] = useState('gallery')
   const [showUploadForm, setShowUploadForm] = useState(false)
-  const [showQRCode, setShowQRCode] = useState(false)
+  const [showQRModal, setShowQRModal] = useState(false)
+  const [storedQrCodeUrl, setStoredQrCodeUrl] = useState<string | undefined>(qrCodeUrl) 
   
   const { eventUploads, fetchEventUploads, isLoading: uploadsLoading } = useUploadStore()
   const { fetchEvent, isLoading: eventLoading } = useEventStore()
@@ -73,6 +77,33 @@ export function EventGallery({ event, eventCode, isAdmin = false }: EventGallery
   useEffect(() => {
     fetchEventUploads(event.id)
   }, [event.id, fetchEventUploads])
+
+  // Fetch QR code if not provided - FIXED TYPING
+  useEffect(() => {
+    const fetchQrCode = async () => {
+      if (!storedQrCodeUrl) {
+        const { data: eventCodeData, error } = await supabase
+          .from('event_codes')
+          .select('qr_code_url')
+          .eq('code', eventCode)
+          .single()
+        
+        if (error) {
+          console.error('Error fetching QR code:', error)
+          return
+        }
+        
+        // Type assertion to tell TypeScript the structure
+        const qrData = eventCodeData as { qr_code_url: string | null }
+        
+        if (qrData?.qr_code_url) {
+          setStoredQrCodeUrl(qrData.qr_code_url)
+        }
+      }
+    }
+    
+    fetchQrCode()
+  }, [eventCode, storedQrCodeUrl, supabase])
 
   const handleUploadComplete = () => {
     fetchEventUploads(event.id)
@@ -135,6 +166,14 @@ export function EventGallery({ event, eventCode, isAdmin = false }: EventGallery
 
   return (
     <div className="min-h-screen bg-gray-50">
+       {/* Add QR Modal */}
+        <QRModal
+          isOpen={showQRModal}
+          onClose={() => setShowQRModal(false)}
+          eventCode={eventCode}
+          eventTitle={event.title}
+          qrCodeUrl={storedQrCodeUrl}
+        />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header Navigation */}
@@ -152,10 +191,10 @@ export function EventGallery({ event, eventCode, isAdmin = false }: EventGallery
               {isAdmin && (
                 <Button
                   variant="outline"
-                  onClick={() => setShowQRCode(!showQRCode)}
+                  onClick={() => setShowQRModal(true)}
                 >
                   <QrCode className="h-4 w-4 mr-2" />
-                  {showQRCode ? 'Hide QR' : 'Show QR'}
+                  Show QR
                 </Button>
               )}
               
@@ -168,17 +207,6 @@ export function EventGallery({ event, eventCode, isAdmin = false }: EventGallery
               </Button>
             </div>
           </div>
-
-          {/* QR Code Display */}
-          {showQRCode && (
-            <div className="mb-6">
-              <QRCodeDisplay
-                qrCodeUrl={`${process.env.NEXT_PUBLIC_APP_URL}/event/${eventCode}`}
-                eventCode={eventCode}
-                eventTitle={event.title}
-              />
-            </div>
-          )}
 
           {/* Hero Section - Ideal Layout Style */}
           <Card className="mb-8 overflow-hidden">
@@ -305,10 +333,10 @@ export function EventGallery({ event, eventCode, isAdmin = false }: EventGallery
                   <Button 
                     variant="outline" 
                     className="w-full gap-2"
-                    onClick={() => setShowQRCode(!showQRCode)}
+                    onClick={() => setShowQRModal(true)}
                   >
                     <QrCode className="h-4 w-4" />
-                    {showQRCode ? 'Hide QR Code' : 'Show QR Code'}
+                    Show QR Code
                   </Button>
                   
                   {isAdmin && (

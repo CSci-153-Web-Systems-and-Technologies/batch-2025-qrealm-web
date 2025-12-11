@@ -10,9 +10,10 @@ interface QRModalProps {
   onClose: () => void
   eventCode: string
   eventTitle: string
+  qrCodeUrl?: string 
 }
 
-export function QRModal({ isOpen, onClose, eventCode, eventTitle }: QRModalProps) {
+export function QRModal({ isOpen, onClose, eventCode, eventTitle, qrCodeUrl }: QRModalProps) {
   if (!isOpen) return null
 
   return (
@@ -40,6 +41,7 @@ export function QRModal({ isOpen, onClose, eventCode, eventTitle }: QRModalProps
           <QRModalContent
             eventCode={eventCode}
             eventTitle={eventTitle}
+            qrCodeUrl={qrCodeUrl}
           />
         </div>
       </div>

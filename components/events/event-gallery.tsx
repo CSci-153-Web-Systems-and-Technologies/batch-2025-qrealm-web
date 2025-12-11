@@ -22,7 +22,6 @@ import {
   ChevronLeft,
   Share2,
   QrCode,
-  Eye,
   EyeOff
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -110,7 +109,7 @@ export function EventGallery({ event, eventCode, isAdmin = false }: EventGallery
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="!min-h-screen !bg-gradient-to-b from-gray-50 to-white">
       {/* Header */}
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">

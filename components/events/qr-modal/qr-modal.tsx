@@ -27,27 +27,23 @@ export function QRModal({ isOpen, onClose, eventCode, eventTitle, qrCodeUrl }: Q
       {/* Modal - Responsive sizing and positioning */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6">
         <div className="relative bg-white dark:bg-gray-900 rounded-lg sm:rounded-xl md:rounded-2xl shadow-lg sm:shadow-xl md:shadow-2xl w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-y-auto
-          /* Custom scrollbar - Modern styling */
-          scrollbar-thin 
-          scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600
-          scrollbar-track-gray-100 dark:scrollbar-track-gray-800
-          hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500
-          scrollbar-thumb-rounded-full scrollbar-track-rounded-full
-          scrollbar-gutter-stable
-          /* WebKit specific */
-          [&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar]:h-2.5
-          [&::-webkit-scrollbar-track]:bg-gray-100 dark:[&::-webkit-scrollbar-track]:bg-gray-800
-          [&::-webkit-scrollbar-track]:rounded-full
-          [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600
-          [&::-webkit-scrollbar-thumb]:rounded-full
-          [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid
-          [&::-webkit-scrollbar-thumb]:border-gray-100 dark:[&::-webkit-scrollbar-thumb]:border-gray-800
-          [&::-webkit-scrollbar-thumb:hover]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb:hover]:bg-gray-500
-          /* Firefox */
-          scrollbar-width: thin
-          scrollbar-color: #d1d5db #f3f4f6
-          dark:scrollbar-color: #4b5563 #1f2937">
-          
+        /* Pull scrollbar inward with negative margin */
+        -mr-1 sm:-mr-2 md:-mr-3
+        /* Custom scrollbar styling */
+        scrollbar-thin 
+        scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600
+        scrollbar-track-transparent
+        hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500
+        scrollbar-thumb-rounded-full
+        /* WebKit */
+        [&::-webkit-scrollbar]:w-2.5
+        [&::-webkit-scrollbar-track]:my-3 sm:my-4
+        [&::-webkit-scrollbar-track]:bg-transparent
+        [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600
+        [&::-webkit-scrollbar-thumb]:rounded-full
+        [&::-webkit-scrollbar-thumb]:mx-1
+        [&::-webkit-scrollbar-thumb:hover]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb:hover]:bg-gray-500">
+                
           {/* Close button - Responsive sizing */}
           <Button
             variant="ghost"

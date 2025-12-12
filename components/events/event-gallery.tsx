@@ -147,69 +147,69 @@ export function EventGallery({ event, eventCode, isAdmin = false, qrCodeUrl }: E
     month: 'long',
     day: 'numeric'
   })
-}
+  }
 
-// Add this function to format time to 12-hour format
-const formatTimeTo12Hour = (timeString: string) => {
-  if (!timeString) return 'Not specified'
-  
-  try {
-    // Try to parse the time string
-    const [hours, minutes] = timeString.split(':').map(Number)
+  // Add this function to format time to 12-hour format
+  const formatTimeTo12Hour = (timeString: string) => {
+    if (!timeString) return 'Not specified'
     
-    if (isNaN(hours) || isNaN(minutes)) {
-      // If parsing fails, return the original string
+    try {
+      // Try to parse the time string
+      const [hours, minutes] = timeString.split(':').map(Number)
+      
+      if (isNaN(hours) || isNaN(minutes)) {
+        // If parsing fails, return the original string
+        return timeString
+      }
+      
+      const period = hours >= 12 ? 'PM' : 'AM'
+      const twelveHour = hours % 12 || 12 // Convert 0 to 12 for 12 AM
+      const formattedMinutes = minutes.toString().padStart(2, '0')
+      
+      return `${twelveHour}:${formattedMinutes} ${period}`
+    } catch (error) {
+      // If any error occurs, return the original string
+      console.error('Error formatting time:', error)
+      return timeString
+    }
+  }
+
+  // Alternative: More robust version that handles various time formats
+  const formatTimeTo12HourAdvanced = (timeString: string) => {
+    if (!timeString) return 'Not specified'
+    
+    // Remove any whitespace and convert to uppercase for consistency
+    const cleanTime = timeString.trim().toUpperCase()
+    
+    // Check if already in 12-hour format with AM/PM
+    if (cleanTime.includes('AM') || cleanTime.includes('PM')) {
+      return cleanTime
+    }
+    
+    // Try to parse as HH:MM or HH:MM:SS
+    const timeRegex = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/
+    const match = cleanTime.match(timeRegex)
+    
+    if (!match) {
+      // Return as-is if doesn't match expected format
       return timeString
     }
     
-    const period = hours >= 12 ? 'PM' : 'AM'
-    const twelveHour = hours % 12 || 12 // Convert 0 to 12 for 12 AM
-    const formattedMinutes = minutes.toString().padStart(2, '0')
+    let hours = parseInt(match[1], 10)
+    const minutes = match[2]
+    // const seconds = match[3] // Ignore seconds for display
     
-    return `${twelveHour}:${formattedMinutes} ${period}`
-  } catch (error) {
-    // If any error occurs, return the original string
-    console.error('Error formatting time:', error)
-    return timeString
+    const period = hours >= 12 ? 'PM' : 'AM'
+    
+    // Convert to 12-hour format
+    hours = hours % 12 || 12 // 0 becomes 12
+    
+    return `${hours}:${minutes} ${period}`
   }
-}
 
-// Alternative: More robust version that handles various time formats
-const formatTimeTo12HourAdvanced = (timeString: string) => {
-  if (!timeString) return 'Not specified'
-  
-  // Remove any whitespace and convert to uppercase for consistency
-  const cleanTime = timeString.trim().toUpperCase()
-  
-  // Check if already in 12-hour format with AM/PM
-  if (cleanTime.includes('AM') || cleanTime.includes('PM')) {
-    return cleanTime
-  }
-  
-  // Try to parse as HH:MM or HH:MM:SS
-  const timeRegex = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/
-  const match = cleanTime.match(timeRegex)
-  
-  if (!match) {
-    // Return as-is if doesn't match expected format
-    return timeString
-  }
-  
-  let hours = parseInt(match[1], 10)
-  const minutes = match[2]
-  // const seconds = match[3] // Ignore seconds for display
-  
-  const period = hours >= 12 ? 'PM' : 'AM'
-  
-  // Convert to 12-hour format
-  hours = hours % 12 || 12 // 0 becomes 12
-  
-  return `${hours}:${minutes} ${period}`
-}
-
-// Choose which version to use
-const formatTime = formatTimeTo12HourAdvanced
-  
+  // Choose which version to use
+  const formatTime = formatTimeTo12HourAdvanced
+    
 
   const getCategoryColor = (categoryName: string) => {
     const colors: Record<string, string> = {

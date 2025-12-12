@@ -1,11 +1,26 @@
 import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from '@/utils/supabase/types'
 
-export const createClient = () =>
-  createBrowserClient<Database>(
+let supabaseInstance: ReturnType<typeof createBrowserClient<Database>> | null = null
+
+/**
+ * Create or return cached Supabase client
+ * IMPORTANT: This ensures auth state is properly initialized and session is attached
+ */
+export const createClient = () => {
+  // Return cached instance if available
+  if (supabaseInstance) {
+    return supabaseInstance
+  }
+
+  // Create new instance
+  supabaseInstance = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
+
+  return supabaseInstance
+}
 
 // Helper function to get the current session
 export const getSession = async () => {

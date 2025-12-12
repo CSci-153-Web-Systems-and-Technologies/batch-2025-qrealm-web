@@ -318,91 +318,230 @@ export const useUploadStore = create<UploadState>((set, get) => ({
   // ========================
   
   createUpload: async (data: CreateUploadData): Promise<UploadCreateResponse> => {
-    set({ isUploading: true, error: null })
+  set({ isUploading: true, error: null })
+  const supabase = createClient()
+  
+  // Get current authenticated user
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  console.log('[UploadStore] === AUTH DEBUG ===')
+  console.log('[UploadStore] User ID:', user?.id || 'null (guest)')
+  console.log('[UploadStore] User email:', user?.email || 'null')
+  console.log('[UploadStore] Is authenticated:', !!user)
+  console.log('[UploadStore] Passed uploaded_by:', data.uploaded_by)
+  
+  try {
+    console.log(`[UploadStore] Creating upload for event ${data.event_id}`)
+
+    // Preflight: verify event allows uploads and is active (matches RLS with_check)
+    const { data: eventRow, error: eventError } = await supabase
+      .from('events')
+      .select('id, allow_photo_upload, is_active')
+      .eq('id', data.event_id)
+      .single()
+
+    if (eventError || !eventRow) {
+      console.error('[UploadStore] Event preflight failed:', eventError)
+      set({ isUploading: false, error: 'Event not found or unavailable' })
+      return { success: false, error: 'Event not found or unavailable' }
+    }
+
+    if (!(eventRow as any).allow_photo_upload) {
+      console.warn('[UploadStore] Upload blocked: allow_photo_upload is false')
+      set({ isUploading: false, error: 'Uploads are disabled for this event' })
+      return { success: false, error: 'Uploads are disabled for this event' }
+    }
+
+    if (!(eventRow as any).is_active) {
+      console.warn('[UploadStore] Upload blocked: event is inactive')
+      set({ isUploading: false, error: 'Event is inactive; uploads are blocked' })
+      return { success: false, error: 'Event is inactive; uploads are blocked' }
+    }
     
-    try {
-      console.log(`[UploadStore] Creating upload for event ${data.event_id}`)
+    // 1. Upload image to storage
+    const uploadResult = await FileUploadService.uploadGuestImage(data.image, data.event_id)
+    
+    if (!uploadResult.success || !uploadResult.url) {
+      const errorMsg = uploadResult.error || 'Image upload failed'
+      console.error('[UploadStore] File upload failed:', errorMsg)
       
-      // 1. Upload image to storage
-      const uploadResult = await FileUploadService.uploadGuestImage(data.image, data.event_id)
-      
-      if (!uploadResult.success || !uploadResult.url) {
-        const errorMsg = uploadResult.error || 'Image upload failed'
-        console.error('[UploadStore] File upload failed:', errorMsg)
-        
-        set({ isUploading: false })
-        return { 
-          success: false, 
-          error: errorMsg
-        }
-      }
-
-      const supabase = createClient()
-      
-      // 2. Create upload record in database
-      const { data: upload, error } = await supabase
-        .from('uploads')
-        .insert([{
-            event_id: data.event_id,
-            image_url: uploadResult.url,
-            uploaded_by: data.uploaded_by?.trim() || null,
-            caption: data.caption?.trim() || null,
-            status: 'pending',
-            ip_address: null
-        }] as any)
-        .select()
-        .single() as any
-
-      if (error || !upload) {
-        // Clean up uploaded file if database insert fails
-        console.error('[UploadStore] Database insert failed, cleaning up file:', error)
-        await FileUploadService.deleteUploadedFile(uploadResult.url)
-        
-        set({ isUploading: false })
-        return { 
-          success: false, 
-          error: `Failed to save upload: ${error?.message || 'No upload returned'}`
-        }
-      }
-
-      const createdUpload = upload as Upload
-
-      console.log(`[UploadStore] Upload created successfully: ${createdUpload.id}`)
-      
-      // 3. Update local state (add to pending and update stats)
-      set(state => {
-        const eventUploads = state.eventUploads[data.event_id] || []
-        
-        return {
-          eventUploads: {
-            ...state.eventUploads,
-            [data.event_id]: [createdUpload, ...eventUploads]
-          },
-          isUploading: false
-        }
-      })
-
-      // 4. Refresh stats
-      await get().fetchUploadStats(data.event_id)
-      
-      return { 
-        success: true, 
-        upload: createdUpload,
-        error: undefined
-      }
-      
-    } catch (error) {
-      console.error('[UploadStore] Unexpected error creating upload:', error)
-      set({ 
-        isUploading: false,
-        error: 'An unexpected error occurred during upload'
-      })
+      set({ isUploading: false })
       return { 
         success: false, 
-        error: 'An unexpected error occurred'
+        error: errorMsg
       }
     }
-  },
+
+    // 2. Determine the correct uploaded_by value based on authentication
+    let uploadedByValue: string | null = null
+    
+    if (user) {
+      // Authenticated user - MUST use their auth.uid() as string (matches TEXT column)
+      uploadedByValue = user.id
+      console.log('[UploadStore] Using authenticated user ID:', uploadedByValue)
+      console.log('[UploadStore] User ID type:', typeof uploadedByValue)
+      console.log('[UploadStore] User ID length:', uploadedByValue.length)
+    } else {
+      // Anonymous guest - MUST be null to satisfy RLS with_check
+      // Policy requires: (auth.uid() IS NULL) AND (uploaded_by IS NULL)
+      uploadedByValue = null
+      console.log('[UploadStore] Using guest (uploaded_by=null) per RLS policy')
+    }
+    
+    // 3. Verify event flags passed preflight
+    console.log('[UploadStore] Preflight checks passed:', {
+      allow_photo_upload: (eventRow as any).allow_photo_upload,
+      is_active: (eventRow as any).is_active
+    })
+    
+    // 4. Create upload record in database
+    const insertPayload = {
+      event_id: data.event_id,
+      image_url: uploadResult.url,
+      uploaded_by: uploadedByValue,  // TEXT column - UUID as string for auth users, null for guests
+      caption: data.caption?.trim() || null,
+      status: 'pending' as const,
+      ip_address: null
+    }
+    
+    console.log('[UploadStore] Insert payload:', insertPayload)
+    console.log('[UploadStore] RLS should check: auth.uid()::text =', uploadedByValue)
+    
+    // CRITICAL FIX: Refresh session to ensure JWT is current (only for authenticated users)
+    // Skip for guests as they don't have a session to refresh
+    let session = null
+    let sessionError = null
+    
+    if (user) {
+      // Only refresh session for authenticated users
+      const refreshResult = await supabase.auth.refreshSession()
+      session = refreshResult.data.session
+      sessionError = refreshResult.error
+      
+      console.log('[UploadStore] Session refresh:', {
+        success: !!session,
+        sessionUserId: session?.user?.id,
+        matchesUploadedBy: session?.user?.id === uploadedByValue,
+        accessToken: session?.access_token ? 'present (JWT)' : 'missing',
+        refreshTokenExpiry: session?.expires_in ? `${session.expires_in}s` : 'unknown',
+        error: sessionError?.message || 'none'
+      })
+      
+      if (!session) {
+        console.error('[UploadStore] AUTH ISSUE: User exists but no session after refresh - RLS will fail!')
+        set({ isUploading: false })
+        return {
+          success: false,
+          error: 'Authentication session expired. Please refresh and try again.'
+        }
+      }
+      
+      // Double-check: The JWT's user ID must match what we're storing in uploaded_by
+      if (session?.user?.id !== uploadedByValue) {
+        console.error('[UploadStore] CRITICAL MISMATCH:', {
+          uploadedByValue,
+          sessionUserId: session?.user?.id,
+          jwtUserId: session?.user?.id,
+          mismatch: 'uploaded_by value does not match JWT session user ID'
+        })
+      }
+    } else {
+      // Guest user - no session to refresh, using anon key
+      console.log('[UploadStore] Guest upload - using anon key (no session refresh needed)')
+    }
+    
+    // Test: Verify RLS by checking what auth.uid() returns server-side
+    console.log('[UploadStore] Testing auth context server-side...')
+    const { data: authTest, error: authTestError } = await (supabase as any)
+      .rpc('auth_uid_test')
+      .then((res: any) => {
+        console.log('[UploadStore] auth.uid() test result:', res)
+        return res
+      })
+      .catch((err: any) => {
+        console.log('[UploadStore] auth.uid() test not available (expected if function not created):', err.message)
+        return { data: null, error: err }
+      })
+    
+    const { data: upload, error } = await (supabase as any)
+      .from('uploads')
+      .insert([insertPayload])
+      .select()
+      .single()
+
+    if (error || !upload) {
+      // Clean up uploaded file if database insert fails
+      console.error('[UploadStore] Database insert failed:', error)
+      console.error('[UploadStore] Error details:', {
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
+      })
+      
+      // More debugging info
+      if (error?.code === '42501') {
+        console.error('[UploadStore] RLS POLICY VIOLATION - Policy did not pass with_check')
+        console.error('[UploadStore] Payload being inserted:', insertPayload)
+        console.error('[UploadStore] Policy requires:')
+        console.error('[UploadStore]   1. status = "pending" (you sent:', insertPayload.status + ')')
+        console.error('[UploadStore]   2. event allows uploads (checked in preflight)')
+        console.error('[UploadStore]   3. uploaded_by must match auth.uid()::text')
+        console.error('[UploadStore]      - Your uploaded_by:', insertPayload.uploaded_by)
+        console.error('[UploadStore]      - Auth context says:', {
+          hasUser: !!user,
+          userId: user?.id,
+          sessionUserId: session?.user?.id
+        })
+      }
+      
+      await FileUploadService.deleteUploadedFile(uploadResult.url)
+      
+      set({ isUploading: false })
+      return { 
+        success: false, 
+        error: `Failed to save upload: ${error?.message || 'No upload returned'}`
+      }
+    }
+
+    const createdUpload = upload as Upload
+
+    console.log(`[UploadStore] Upload created successfully: ${createdUpload.id}`)
+    
+    // 4. Update local state (add to pending and update stats)
+    set(state => {
+      const eventUploads = state.eventUploads[data.event_id] || []
+      
+      return {
+        eventUploads: {
+          ...state.eventUploads,
+          [data.event_id]: [createdUpload, ...eventUploads]
+        },
+        isUploading: false
+      }
+    })
+
+    // 5. Refresh stats
+    await get().fetchUploadStats(data.event_id)
+    
+    return { 
+      success: true, 
+      upload: createdUpload,
+      error: undefined
+    }
+    
+  } catch (error) {
+    console.error('[UploadStore] Unexpected error creating upload:', error)
+    set({ 
+      isUploading: false,
+      error: 'An unexpected error occurred during upload'
+    })
+    return { 
+      success: false, 
+      error: 'An unexpected error occurred'
+    }
+  }
+},
 
   createBulkUploads: async (files: File[], eventId: string, uploadedBy?: string): Promise<BulkUploadResponse> => {
     set({ isUploading: true, uploadErrors: [] })

@@ -151,43 +151,29 @@ export class EventQRGenerator {
   }
 
   /**
-   * Generate QR code and return both code and image
-   
+   * Generate QR code and return code + data URL (server-safe)
+   */
   static async generateEventQRCode(
     options?: QRCodeOptions
-  ): Promise<{ 
-    code: string; 
-    pngBlob: Blob; 
-    pngDataUrl: string;
-    svg: string; 
-    qrCodeUrl: string 
+  ): Promise<{
+    code: string
+    qrCodeUrl: string
+    svg?: string
   }> {
     const code = this.generateEventCode()
-    
-    // Generate all formats in parallel for better performance
+
+    // Server-safe generation: avoid DOM/Blob APIs
     const [qrCodeUrl, svg] = await Promise.all([
       this.generateQRCodeDataURL(code, { ...options, width: options?.width || 300 }),
       this.generateQRCodeSvg(code, { ...options, width: options?.width || 300 })
     ])
 
-    // Generate PNG blob separately (canvas method works in browser)
-    const pngBlob = await this.generateQRCodePngBlobFromDataURL(code, { 
-      ...options, 
-      width: options?.width || 2000 
-    })
-    
-    // Convert Blob to Data URL for PNG
-    const pngDataUrl = await this.blobToDataURL(pngBlob)
-    
-    return { 
-      code, 
-      pngBlob, 
-      pngDataUrl, 
-      svg, 
-      qrCodeUrl 
+    return {
+      code,
+      qrCodeUrl,
+      svg
     }
   }
-  */
 
   /**
    * Helper to convert Blob to Data URL

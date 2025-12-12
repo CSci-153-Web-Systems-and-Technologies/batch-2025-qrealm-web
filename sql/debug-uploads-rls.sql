@@ -4,7 +4,7 @@
 -- 1. Drop the old policy
 DROP POLICY IF EXISTS upload_insert_anyone ON uploads;
 
--- 2. Recreate with UUID comparison (safer than text comparison)
+-- 2. Recreate with proper anon role handling (safer than auth.uid() IS NULL check)
 CREATE POLICY upload_insert_anyone
 ON uploads
 FOR INSERT
@@ -20,11 +20,11 @@ WITH CHECK (
   )
   -- Check 3: Authentication rule
   AND (
-    -- CASE A: Authenticated user - uploaded_by (as UUID) MUST match auth.uid()
-    (auth.uid() IS NOT NULL AND uploaded_by = (auth.uid())::text)
+    -- CASE A: Authenticated user - uploaded_by MUST match auth.uid()
+    (auth.role() = 'authenticated' AND uploaded_by = (auth.uid())::text)
     OR
-    -- CASE B: Anonymous/guest - uploaded_by MUST be NULL
-    (auth.uid() IS NULL AND uploaded_by IS NULL)
+    -- CASE B: Anonymous/guest - allow anon role OR no role (no JWT); uploaded_by MUST be NULL
+    ((auth.role() = 'anon' OR auth.role() IS NULL) AND uploaded_by IS NULL)
   )
 );
 
@@ -78,7 +78,10 @@ USING (
   )
   OR
   -- Authenticated users can see their own uploads (pending/approved/rejected)
-  (auth.uid() IS NOT NULL AND uploaded_by = (auth.uid())::text)
+  (auth.role() = 'authenticated' AND uploaded_by = (auth.uid())::text)
+  OR
+  -- Guests (anon or no role) can read their own newly inserted rows (uploaded_by IS NULL)
+  ((auth.role() = 'anon' OR auth.role() IS NULL) AND uploaded_by IS NULL)
 );
 
 -- 6. CRITICAL: Check what auth.uid() returns vs what we're storing

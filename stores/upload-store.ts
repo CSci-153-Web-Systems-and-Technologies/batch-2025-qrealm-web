@@ -407,36 +407,47 @@ export const useUploadStore = create<UploadState>((set, get) => ({
     console.log('[UploadStore] Insert payload:', insertPayload)
     console.log('[UploadStore] RLS should check: auth.uid()::text =', uploadedByValue)
     
-    // CRITICAL FIX: Refresh session to ensure JWT is current
-    // This is essential because the cached Supabase client might have a stale session
-    const { data: { session }, error: sessionError } = await supabase.auth.refreshSession()
+    // CRITICAL FIX: Refresh session to ensure JWT is current (only for authenticated users)
+    // Skip for guests as they don't have a session to refresh
+    let session = null
+    let sessionError = null
     
-    console.log('[UploadStore] Session refresh:', {
-      success: !!session,
-      sessionUserId: session?.user?.id,
-      matchesUploadedBy: session?.user?.id === uploadedByValue,
-      accessToken: session?.access_token ? 'present (JWT)' : 'missing',
-      refreshTokenExpiry: session?.expires_in ? `${session.expires_in}s` : 'unknown',
-      error: sessionError?.message || 'none'
-    })
-    
-    if (user && !session) {
-      console.error('[UploadStore] AUTH ISSUE: User exists but no session after refresh - RLS will fail!')
-      set({ isUploading: false })
-      return {
-        success: false,
-        error: 'Authentication session expired. Please refresh and try again.'
-      }
-    }
-    
-    // Double-check: The JWT's user ID must match what we're storing in uploaded_by
-    if (user && session?.user?.id !== uploadedByValue) {
-      console.error('[UploadStore] CRITICAL MISMATCH:', {
-        uploadedByValue,
+    if (user) {
+      // Only refresh session for authenticated users
+      const refreshResult = await supabase.auth.refreshSession()
+      session = refreshResult.data.session
+      sessionError = refreshResult.error
+      
+      console.log('[UploadStore] Session refresh:', {
+        success: !!session,
         sessionUserId: session?.user?.id,
-        jwtUserId: session?.user?.id,
-        mismatch: 'uploaded_by value does not match JWT session user ID'
+        matchesUploadedBy: session?.user?.id === uploadedByValue,
+        accessToken: session?.access_token ? 'present (JWT)' : 'missing',
+        refreshTokenExpiry: session?.expires_in ? `${session.expires_in}s` : 'unknown',
+        error: sessionError?.message || 'none'
       })
+      
+      if (!session) {
+        console.error('[UploadStore] AUTH ISSUE: User exists but no session after refresh - RLS will fail!')
+        set({ isUploading: false })
+        return {
+          success: false,
+          error: 'Authentication session expired. Please refresh and try again.'
+        }
+      }
+      
+      // Double-check: The JWT's user ID must match what we're storing in uploaded_by
+      if (session?.user?.id !== uploadedByValue) {
+        console.error('[UploadStore] CRITICAL MISMATCH:', {
+          uploadedByValue,
+          sessionUserId: session?.user?.id,
+          jwtUserId: session?.user?.id,
+          mismatch: 'uploaded_by value does not match JWT session user ID'
+        })
+      }
+    } else {
+      // Guest user - no session to refresh, using anon key
+      console.log('[UploadStore] Guest upload - using anon key (no session refresh needed)')
     }
     
     // Test: Verify RLS by checking what auth.uid() returns server-side

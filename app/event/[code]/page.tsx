@@ -16,9 +16,13 @@ export default async function EventPage({ params }: PageProps) {
   
   console.log('Looking for event with code:', code)
 
-  // Get current session
-  const { data: { session } } = await supabase.auth.getSession()
-  const userId = session?.user?.id
+  // Get authenticated user
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  const userId = user?.id
+
+  console.log('User data:', user)
+  console.log('User ID:', userId)
+  console.log('Is user logged in?', !!userId)
   
   // Find event by code
   const { data: eventCode, error } = await supabase
@@ -43,11 +47,12 @@ export default async function EventPage({ params }: PageProps) {
   }
 
   const event = eventCode.events
+  const qrCodeUrl = eventCode.qr_code_url 
   console.log('Found event:', event.title)
   console.log('Event created by:', event.created_by)
   
   // Check if current user is the event owner (admin)
-  const isAdmin = userId && event.created_by === userId ? true : undefined
+  const isAdmin = userId && event.created_by === userId ? true : false
   
   console.log('User is admin/owner?', isAdmin, '(User:', userId, 'Creator:', event.created_by, ')')
 
@@ -80,5 +85,5 @@ export default async function EventPage({ params }: PageProps) {
   }
 
   console.log('Rendering event gallery for:', event.title)
-  return <EventGallery event={event} eventCode={code} isAdmin={isAdmin} />
+  return <EventGallery event={event} eventCode={code} isAdmin={isAdmin} qrCodeUrl={qrCodeUrl} />
 }

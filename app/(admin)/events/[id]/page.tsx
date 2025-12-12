@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server"
 import { notFound } from "next/navigation"
 import { QRCodeDisplay } from "@/components/events/qr-code-display"
 import { Button } from "@/components/ui/button"
+import { EventDetailRefreshButton } from "@/components/events/event-detail-refresh-button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -65,9 +66,7 @@ export default async function EventDetailPage({ params }: PageProps) {
       ) : (
         <div className="max-w-md mx-auto bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
           <p className="text-yellow-800">QR code is being generated...</p>
-          <Button onClick={() => window.location.reload()} className="mt-2">
-            Refresh Page
-          </Button>
+          <EventDetailRefreshButton />
         </div>
       )}
     </div>

@@ -28,6 +28,17 @@
   --white-800: #8c8c8c;
   --white-900: #6b6b6b;
 
+  /* QRealm Brand Theme */
+  :root {
+    --brand-primary: #0ea5e9; /* sky-500 */
+    --brand-primary-600: #0284c7; /* sky-600 */
+    --brand-secondary: #7c3aed; /* violet-600 */
+    --brand-accent: #22c55e; /* green-500 */
+    --brand-warn: #f59e0b; /* amber-500 */
+    --brand-bg: #f8fafc; /* slate-50 */
+    --brand-text: #0f172a; /* slate-900 */
+  }
+
   /* Black color palette */
   --black-50: #e6e6e6;
   --black-100: #b0b0b0;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Event } from '@/types'
 import { useEventCover } from '@/hooks/use-placeholder-image'
@@ -20,7 +21,6 @@ import {
   MapPin,
   Clock,
   Image as ImageIcon,
-  ChevronLeft,
   Share2,
   QrCode,
   EyeOff,
@@ -31,6 +31,9 @@ import {
   Zap,
   Lock,
   Sparkles,
+  ChevronLeft,
+  ArrowLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -38,6 +41,8 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { QRModal } from '@/components/events/qr-modal'
 import { createClient } from '@/utils/supabase/client'
+import TopNavbar from '@/components/layout/top-navbar'
+import GuestNavbar from '@/components/layout/guest-navbar'
 
 // Dynamically import Tabs to avoid hydration mismatch
 const Tabs = dynamic(
@@ -60,11 +65,12 @@ const TabsContent = dynamic(
 interface EventGalleryProps {
   event: Event
   eventCode: string
+  isLoggedIn?: boolean
   isAdmin?: boolean
   qrCodeUrl?: string
 }
 
-export function EventGallery({ event, eventCode, isAdmin = false, qrCodeUrl }: EventGalleryProps) {
+export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = false, qrCodeUrl }: EventGalleryProps) {
   const router = useRouter()
   const supabase = createClient()
   const coverImage = useEventCover(event.cover_image_url)
@@ -234,7 +240,8 @@ export function EventGallery({ event, eventCode, isAdmin = false, qrCodeUrl }: E
 
   return (
     <div className="min-h-screen bg-gray-50">
-       {/* Add QR Modal */}
+      {isLoggedIn ? <TopNavbar /> : <GuestNavbar />}
+      {/* Add QR Modal */}
         <QRModal
           isOpen={showQRModal}
           onClose={() => setShowQRModal(false)}
@@ -244,37 +251,53 @@ export function EventGallery({ event, eventCode, isAdmin = false, qrCodeUrl }: E
         />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          {/* Header Navigation */}
-          <div className="flex items-center justify-between mb-6">
-            <Button
-              variant="ghost"
-              onClick={() => router.back()}
-              className="flex items-center gap-2"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Back
-            </Button>
-            
-            <div className="flex items-center gap-3">
-              {isAdmin && (
+          {/* Header Navigation - Show for all logged-in users */}
+          {isLoggedIn && (
+            <div className="space-y-4 !mb-8">
+              {/* Breadcrumb Navigation */}
+              <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Button
-                  variant="outline"
-                  onClick={() => setShowQRModal(true)}
+                  variant="ghost"
+                  onClick={() => router.push('/discover')}
+                  className="flex items-center gap-1 p-0 h-auto hover:bg-transparent hover:text-gray-700 font-normal"
                 >
-                  <QrCode className="h-4 w-4 mr-2" />
-                  Show QR
+                  <ArrowLeft className="h-3 w-3" />
+                  <span>Discover</span>
                 </Button>
-              )}
+                <ChevronRight className="h-3 w-3" />
+                <span className="text-gray-900 font-medium">{event.title}</span>
+              </div>
+
+              {/* Page Title and Description */}
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold">Event Gallery</h1>
+                <p className="text-gray-600 mt-2 text-sm sm:text-base">
+                  {isAdmin ? 'Manage and moderate event photos' : 'View and share event photos'}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3 justify-end">
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowQRModal(true)}
+                  >
+                    <QrCode className="h-4 w-4 mr-2" />
+                    Show QR
+                  </Button>
+                )}
+
               
-              <Button
-                variant="outline"
-                onClick={handleShare}
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* {!isLoggedIn && (
+            <div className="flex items-center justify-end mb-6">
+              
+            </div>
+          )} */}
 
           {/* Hero Section - Ideal Layout Style */}
           <Card className="mb-8 overflow-hidden border-0 shadow-lg">

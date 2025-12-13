@@ -111,6 +111,7 @@ export default function LoginForm() {
                 id="password"
                 type="password"
                 placeholder="Enter your password"
+                autoComplete="current-password"
                 {...register('password')}
                 disabled={isLoading}
                 className="mmt-1

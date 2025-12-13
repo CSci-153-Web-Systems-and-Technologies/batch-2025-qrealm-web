@@ -13,3 +13,9 @@ export {
   rejectUpload,
   getModerationStats,
 } from './moderation'
+
+export {
+  getDashboardStats,
+  getUserEventsWithStats,
+  getRecentUploads,
+} from './dashboard'

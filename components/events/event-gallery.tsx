@@ -469,32 +469,35 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
           </div>
 
           {/* Tabs Section - Keep Your Existing Structure */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3">
-              <TabsTrigger value="gallery" className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4" />
-                Gallery
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+            <TabsList className="grid w-full grid-cols-3 gap-1 sm:gap-2">
+              <TabsTrigger value="gallery" className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4">
+                <ImageIcon className="h-4 w-4 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Gallery</span>
+                <span className="sm:hidden text-xs">Gallery</span>
               </TabsTrigger>
               
-              <TabsTrigger value="upload" className="flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                Upload
+              <TabsTrigger value="upload" className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4">
+                <Upload className="h-4 w-4 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Upload</span>
+                <span className="sm:hidden text-xs">Upload</span>
               </TabsTrigger>
               
-              <TabsTrigger value="info" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Details
+              <TabsTrigger value="info" className="flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4">
+                <Calendar className="h-4 w-4 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Details</span>
+                <span className="sm:hidden text-xs">Info</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Gallery Tab */}
-            <TabsContent value="gallery" className="space-y-6">
+            <TabsContent value="gallery" className="space-y-4 sm:space-y-6">
               {uploads.length > 0 ? (
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Event Photos</CardTitle>
+                  <CardHeader className="px-4 sm:px-6">
+                    <CardTitle className="text-lg sm:text-xl">Event Photos</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="px-4 sm:px-6">
                     <PhotoGallery 
                       uploads={uploads}
                       isLoading={isLoading}
@@ -504,12 +507,12 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
                 </Card>
               ) : (
                 <Card>
-                  <CardContent className="py-12 text-center">
-                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Camera className="h-10 w-10 text-gray-400" />
+                  <CardContent className="py-8 sm:py-12 px-4 text-center">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Camera className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">No Photos Yet</h3>
-                    <p className="text-gray-600 mb-6">
+                    <h3 className="text-lg sm:text-xl font-semibold mb-2">No Photos Yet</h3>
+                    <p className="text-sm sm:text-base text-gray-600 mb-6 px-4">
                       {event.allow_photo_upload 
                         ? "Be the first to share your memories from this event!"
                         : "Photo uploads are not enabled for this event."}
@@ -552,37 +555,39 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
                   </Card>
                 ) : (
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Upload className="h-5 w-5" />
-                        Share Your Photos
+                    <CardHeader className="px-4 sm:px-6">
+                      <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                        <Upload className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="hidden sm:inline">Share Your Photos</span>
+                        <span className="sm:hidden">Upload Photos</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="text-center py-8">
-                        <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Camera className="h-10 w-10 text-blue-600" />
+                    <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+                      <div className="text-center py-6 sm:py-8">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Camera className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
                         </div>
-                        <h3 className="text-xl font-semibold mb-2">
+                        <h3 className="text-lg sm:text-xl font-semibold mb-2">
                           Upload Your Photos
                         </h3>
-                        <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                        <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-md mx-auto px-4">
                           Share your favorite moments from {event.title}
                         </p>
                         <Button 
                           size="lg" 
                           onClick={() => setShowUploadForm(true)}
+                          className="w-full sm:w-auto"
                         >
-                          <Upload className="h-5 w-5 mr-2" />
+                          <Upload className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                           Start Uploading
                         </Button>
                       </div>
                       
-                      <Separator />
+                      <Separator className="my-4 sm:my-6" />
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 pt-2 sm:pt-4">
                         {/* Easy Upload */}
-                        <div className="text-center p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <div className="text-center p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm hover:shadow-md transition-shadow duration-300">
                           <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4 p-3">
                             <Zap className="h-7 w-7 text-green-600 dark:text-green-400" />
                           </div>
@@ -619,14 +624,14 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
                 )
               ) : (
                 <Card>
-                  <CardContent className="py-12 text-center">
-                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <EyeOff className="h-10 w-10 text-gray-400" />
+                  <CardContent className="py-8 sm:py-12 px-4 text-center">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <EyeOff className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">
+                    <h3 className="text-lg sm:text-xl font-semibold mb-2">
                       Photo Uploads Disabled
                     </h3>
-                    <p className="text-gray-600 max-w-md mx-auto">
+                    <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto px-4">
                       The event organizer has disabled photo uploads for this event.
                     </p>
                   </CardContent>
@@ -637,22 +642,22 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
             {/* Info Tab */}
             <TabsContent value="info">
               <Card className="border-1 shadow-lg">
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-3 px-4 sm:px-6">
                   <div className="flex items-center gap-2">
-                    <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-lg">
-                      <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-lg">
+                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
                       Event Details
                     </CardTitle>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                     Complete information about this event
                   </p>
                 </CardHeader>
-                <CardContent className="space-y-8">
+                <CardContent className="space-y-6 sm:space-y-8 px-4 sm:px-6">
                   {/* Main Event Information */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     {/* Left Column */}
                     <div className="space-y-5">
                       <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-gray-50/50 to-white dark:from-gray-900/50 dark:to-gray-800/30">
@@ -734,11 +739,11 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
                           <div className="flex items-center gap-2 mb-1.5">
                             <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Event Code</span>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <div className="font-mono text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 text-white dark:text-gray-900 px-4 py-2.5 rounded-lg tracking-wider shadow-sm">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                            <div className="font-mono text-base sm:text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 text-white dark:text-gray-900 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg tracking-wider shadow-sm break-all">
                               {eventCode}
                             </div>
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-[10px] sm:text-xs">
                               Unique Identifier
                             </Badge>
                           </div>
@@ -770,39 +775,39 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
                     </div>
                   </div>
 
-                  <Separator className="my-2" />
+                  <Separator className="my-4 sm:my-6" />
 
                   {/* Upload Settings */}
                   <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="p-2 bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20 rounded-lg">
-                        <Upload className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                      <div className="p-1.5 sm:p-2 bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20 rounded-lg">
+                        <Upload className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
                       </div>
-                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">Upload Settings</h4>
+                      <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">Upload Settings</h4>
                     </div>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Status</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                      <div className="p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Status</p>
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${event.allow_photo_upload ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
-                          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                          <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
                             {event.allow_photo_upload ? 'Open' : 'Closed'}
                           </p>
                         </div>
                       </div>
                       
-                      <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Max Photos</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      <div className="p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Max Photos</p>
+                        <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                           {event.max_photos || <span className="text-gray-400 text-lg">∞</span>}
                         </p>
                       </div>
                       
-                      <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Photos Uploaded</p>
+                      <div className="p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Photos Uploaded</p>
                         <div className="flex items-baseline gap-1">
-                          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{uploads.length}</p>
+                          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{uploads.length}</p>
                           {event.max_photos && (
                             <p className="text-sm text-gray-500 dark:text-gray-400">
                               / {event.max_photos}
@@ -821,10 +826,10 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
                         )}
                       </div>
                       
-                      <div className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
-                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Created</p>
+                      <div className="p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 shadow-sm">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Created</p>
                         <div className="space-y-1">
-                          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                          <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
                             {event.created_at 
                               ? new Date(event.created_at).toLocaleDateString('en-US', { 
                                   month: 'short', 

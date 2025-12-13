@@ -44,11 +44,11 @@ export default function TopNavbar({ userEmail }: TopNavbarProps) {
   ] as const
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <nav className="bg-white border-b border-brand-600/10 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link href="/discover" className="group">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-blue-800 transition-all">
+            <span className="text-2xl font-bold text-brand-600 group-hover:text-brand-700 transition-colors">
               QRealm
             </span>
           </Link>
@@ -79,14 +79,14 @@ export default function TopNavbar({ userEmail }: TopNavbarProps) {
                   key={link.name}
                   href={link.href}
                   className={`relative px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                    active ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    active ? 'bg-brand/10 text-brand-600' : 'text-gray-700 hover:bg-brand/5 hover:text-brand-600'
                   }`}
                   title={link.description}
                 >
                   <Icon className="h-4 w-4" />
                   <span className="text-sm font-medium">{link.name}</span>
                   {active && (
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-blue-600 rounded-full" />
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-brand-600 rounded-full" />
                   )}
                 </Link>
               )
@@ -96,24 +96,24 @@ export default function TopNavbar({ userEmail }: TopNavbarProps) {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-brand/10 transition-colors"
               aria-haspopup="menu"
               aria-expanded={isDropdownOpen}
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-brand-600 rounded-full flex items-center justify-center ring-1 ring-brand-600/30">
                 <User className="h-4 w-4 text-white" />
               </div>
               <ChevronDown className={`h-4 w-4 text-gray-600 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-                <div className="px-4 py-3 border-b border-gray-100">
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-brand-600/10 py-2">
+                <div className="px-4 py-3 border-b border-brand-600/10">
                   <p className="text-sm font-medium text-gray-900">Signed in as</p>
                   <p className="text-sm text-gray-600 truncate mt-1">{userEmail || 'user@example.com'}</p>
                 </div>
 
-                <div className="md:hidden py-2 border-b border-gray-100">
+                <div className="md:hidden py-2 border-b border-brand-600/10">
                   {navLinks.map((link) => {
                     const Icon = link.icon
                     if ((link as any).disabled) {
@@ -133,9 +133,9 @@ export default function TopNavbar({ userEmail }: TopNavbarProps) {
                         key={link.name}
                         href={link.href}
                         onClick={() => setIsDropdownOpen(false)}
-                        className="px-4 py-2 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                        className="px-4 py-2 hover:bg-brand/5 flex items-center gap-3 transition-colors"
                       >
-                        <Icon className="h-4 w-4 text-gray-600" />
+                        <Icon className="h-4 w-4 text-brand-600" />
                         <div>
                           <div className="text-sm font-medium text-gray-900">{link.name}</div>
                           <div className="text-xs text-gray-500">{link.description}</div>
@@ -147,7 +147,7 @@ export default function TopNavbar({ userEmail }: TopNavbarProps) {
 
                 <button
                   onClick={handleLogout}
-                  className="w-full px-4 py-2 hover:bg-red-50 flex items-center gap-3 text-red-600 transition-colors"
+                  className="w-full px-4 py-2 hover:bg-red-50/50 flex items-center gap-3 text-red-600 transition-colors"
                 >
                   <LogOut className="h-4 w-4" />
                   <span className="text-sm font-medium">Logout</span>

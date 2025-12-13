@@ -56,7 +56,13 @@ export async function getUserEventPendingUploads(userId: string) {
     return [] as ModerationUpload[]
   }
 
-  return (data || []) as ModerationUpload[]
+  // Normalize joined relation: Supabase may return `event` as an array
+  const normalized = (data || []).map((row: any) => ({
+    ...row,
+    event: Array.isArray(row.event) ? row.event[0] : row.event,
+  })) as ModerationUpload[]
+
+  return normalized
 }
 
 export async function approveUpload(uploadId: string, userId: string) {
@@ -80,7 +86,12 @@ export async function approveUpload(uploadId: string, userId: string) {
     throw new Error('Upload not found')
   }
 
-  if (upload.event?.created_by !== userId) {
+  // In some Supabase typings, joined relation may appear as an array. Normalize it.
+  const eventOwnerId = Array.isArray((upload as any).event)
+    ? (upload as any).event[0]?.created_by
+    : (upload as any).event?.created_by
+
+  if (eventOwnerId !== userId) {
     throw new Error('Unauthorized: You do not own this event')
   }
 
@@ -121,7 +132,11 @@ export async function rejectUpload(uploadId: string, userId: string) {
     throw new Error('Upload not found')
   }
 
-  if (upload.event?.created_by !== userId) {
+  const eventOwnerId = Array.isArray((upload as any).event)
+    ? (upload as any).event[0]?.created_by
+    : (upload as any).event?.created_by
+
+  if (eventOwnerId !== userId) {
     throw new Error('Unauthorized: You do not own this event')
   }
 

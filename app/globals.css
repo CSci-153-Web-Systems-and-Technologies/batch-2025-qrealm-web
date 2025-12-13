@@ -28,6 +28,18 @@
   --white-800: #8c8c8c;
   --white-900: #6b6b6b;
 
+  /* Black color palette */
+  --black-50: #f9f9f9;
+  --black-100: #e6e6e6;
+  --black-200: #cccccc;
+  --black-300: #999999;
+  --black-400: #666666;
+  --black-500: #404040;
+  --black-600: #262626;
+  --black-700: #1a1a1a;
+  --black-800: #0f0f0f;
+  --black-900: #000000;
+
   /* QRealm Brand Theme */
   :root {
     --brand-primary: #0ea5e9; /* sky-500 */
@@ -39,17 +51,7 @@
     --brand-text: #0f172a; /* slate-900 */
   }
 
-  /* Black color palette */
-  --black-50: #e6e6e6;
-  --black-100: #b0b0b0;
-  --black-200: #8a8a8a;
-  --black-300: #545454;
-  --black-400: #333333;
-  --black-500: #000000;
-  --black-600: #000000;
-  --black-700: #000000;
-  --black-800: #000000;
-  --black-900: #000000;
+  
 
   /* shadcn colors updated to use your brand-500 */
   --radius: 0.5rem;
@@ -307,5 +309,10 @@
 
   .animate-scroll {
     animation: scroll 2s infinite;
+  }
+
+  /* Brand gradient text utility */
+  .brand-gradient {
+    @apply bg-gradient-to-r from-brand-600 to-brand-500;
   }
 }

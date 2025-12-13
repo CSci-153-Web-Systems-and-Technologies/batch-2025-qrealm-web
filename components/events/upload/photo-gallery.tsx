@@ -161,7 +161,7 @@ export function PhotoGallery({
         {uploads.map((upload) => (
           <Card 
             key={upload.id} 
-            className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+            className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-gray-200"
           >
             {/* Image Container */}
             <div 
@@ -190,11 +190,11 @@ export function PhotoGallery({
               </div>
 
               {/* Quick Actions */}
-              <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="h-8 w-8 bg-white/80 hover:bg-white"
+                  className="h-9 w-9 bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm rounded-full"
                   onClick={(e) => {
                     e.stopPropagation()
                     handleDownload(upload)
@@ -206,38 +206,38 @@ export function PhotoGallery({
             </div>
 
             {/* Metadata */}
-            <CardContent className="p-4">
+            <CardContent className="p-4 space-y-3">
               {upload.caption && (
-                <p className="text-sm font-medium mb-2 line-clamp-2">
+                <p className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug">
                   {upload.caption}
                 </p>
               )}
               
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <div className="flex items-center gap-2">
-                  <User className="h-3 w-3" />
-                  <span className="font-medium">
+              <div className="flex items-center justify-between text-xs text-gray-500 gap-2">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <User className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="font-medium truncate">
                     {upload.uploaded_by || 'Anonymous'}
                   </span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  <span>{formatDate(upload.created_at)}</span>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span className="whitespace-nowrap">{formatDate(upload.created_at)}</span>
                 </div>
               </div>
             </CardContent>
 
             {/* Footer Actions */}
-            <CardFooter className="p-4 pt-0 border-t">
+            <CardFooter className="px-4 py-3 border-t bg-gray-50/50">
               <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className={`h-8 px-2 transition-colors ${
+                    className={`h-9 px-3 transition-all rounded-full ${
                       userReactions[upload.id]?.heart 
-                        ? 'text-red-500 hover:text-red-600' 
-                        : 'text-gray-500 hover:text-red-500'
+                        ? 'text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100' 
+                        : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
                     }`}
                     onClick={(e) => {
                       e.stopPropagation()
@@ -246,11 +246,11 @@ export function PhotoGallery({
                     disabled={loadingReactions}
                   >
                     <Heart 
-                      className={`h-4 w-4 mr-1 ${
-                        userReactions[upload.id]?.heart ? 'fill-current' : ''
+                      className={`h-4 w-4 mr-1.5 transition-transform ${
+                        userReactions[upload.id]?.heart ? 'fill-current scale-110' : ''
                       }`} 
                     />
-                    <span className="text-xs">
+                    <span className="text-xs font-medium">
                       {reactionCounts[upload.id]?.heart || 0}
                     </span>
                   </Button>
@@ -258,10 +258,10 @@ export function PhotoGallery({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className={`h-8 px-2 transition-colors ${
+                    className={`h-9 px-3 transition-all rounded-full ${
                       userReactions[upload.id]?.sparkle 
-                        ? 'text-yellow-500 hover:text-yellow-600' 
-                        : 'text-gray-500 hover:text-yellow-500'
+                        ? 'text-yellow-500 hover:text-yellow-600 bg-yellow-50 hover:bg-yellow-100' 
+                        : 'text-gray-500 hover:text-yellow-500 hover:bg-yellow-50'
                     }`}
                     onClick={(e) => {
                       e.stopPropagation()
@@ -270,19 +270,26 @@ export function PhotoGallery({
                     disabled={loadingReactions}
                   >
                     <Sparkles 
-                      className={`h-4 w-4 mr-1 ${
-                        userReactions[upload.id]?.sparkle ? 'fill-current' : ''
+                      className={`h-4 w-4 mr-1.5 transition-transform ${
+                        userReactions[upload.id]?.sparkle ? 'fill-current scale-110' : ''
                       }`} 
                     />
-                    <span className="text-xs">
+                    <span className="text-xs font-medium">
                       {reactionCounts[upload.id]?.sparkle || 0}
                     </span>
                   </Button>
                 </div>
                 
-                {/* <Badge variant="outline" className="text-xs">
-                  {upload.status === 'approved' ? 'Approved' : 'Pending'}
-                </Badge> */}
+                <Badge 
+                  variant="outline" 
+                  className={`text-[10px] px-2 py-0.5 ${
+                    upload.status === 'approved' 
+                      ? 'bg-green-50 text-green-700 border-green-200' 
+                      : 'bg-orange-50 text-orange-700 border-orange-200'
+                  }`}
+                >
+                  {upload.status === 'approved' ? '✓ Approved' : '⏳ Pending'}
+                </Badge>
               </div>
             </CardFooter>
           </Card>

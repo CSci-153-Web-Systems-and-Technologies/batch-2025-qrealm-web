@@ -1,9 +1,10 @@
 // components/events/upload/photo-gallery.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Upload } from '@/types/upload'
-import { Maximize2, User, Calendar, Download, Heart, MessageCircle } from 'lucide-react'
+import { Maximize2, User, Calendar, Download, Heart, MessageCircle, Sparkles } from 'lucide-react'
+import { togglePhotoReaction, getReactionCounts, getUserReactions } from '@/lib/queries/reactions'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -29,6 +30,30 @@ export function PhotoGallery({
   onPhotoClick 
 }: PhotoGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<Upload | null>(null)
+  const [reactionCounts, setReactionCounts] = useState<Record<string, Record<string, number>>>({})
+  const [userReactions, setUserReactions] = useState<Record<string, Record<string, boolean>>>({})
+  const [loadingReactions, setLoadingReactions] = useState(false)
+
+  // Fetch reactions when uploads change
+  useEffect(() => {
+    const fetchReactions = async () => {
+      if (uploads.length === 0) return
+      
+      setLoadingReactions(true)
+      const uploadIds = uploads.map(u => u.id)
+      
+      const [counts, userReacts] = await Promise.all([
+        getReactionCounts(uploadIds),
+        getUserReactions(uploadIds)
+      ])
+      
+      setReactionCounts(counts)
+      setUserReactions(userReacts)
+      setLoadingReactions(false)
+    }
+    
+    fetchReactions()
+  }, [uploads])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -55,6 +80,29 @@ export function PhotoGallery({
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  }
+
+  const handleReaction = async (uploadId: string, reactionType: 'heart' | 'sparkle') => {
+    const result = await togglePhotoReaction(uploadId, reactionType)
+    
+    if (result) {
+      // Update local state
+      setReactionCounts(prev => ({
+        ...prev,
+        [uploadId]: {
+          ...prev[uploadId],
+          [reactionType]: result.count
+        }
+      }))
+      
+      setUserReactions(prev => ({
+        ...prev,
+        [uploadId]: {
+          ...prev[uploadId],
+          [reactionType]: result.has_reacted
+        }
+      }))
+    }
   }
 
   if (isLoading) {
@@ -186,25 +234,55 @@ export function PhotoGallery({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 px-2 text-gray-500 hover:text-red-500"
+                    className={`h-8 px-2 transition-colors ${
+                      userReactions[upload.id]?.heart 
+                        ? 'text-red-500 hover:text-red-600' 
+                        : 'text-gray-500 hover:text-red-500'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleReaction(upload.id, 'heart')
+                    }}
+                    disabled={loadingReactions}
                   >
-                    <Heart className="h-4 w-4 mr-1" />
-                    <span className="text-xs">0</span>
+                    <Heart 
+                      className={`h-4 w-4 mr-1 ${
+                        userReactions[upload.id]?.heart ? 'fill-current' : ''
+                      }`} 
+                    />
+                    <span className="text-xs">
+                      {reactionCounts[upload.id]?.heart || 0}
+                    </span>
                   </Button>
                   
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 px-2 text-gray-500 hover:text-blue-500"
+                    className={`h-8 px-2 transition-colors ${
+                      userReactions[upload.id]?.sparkle 
+                        ? 'text-yellow-500 hover:text-yellow-600' 
+                        : 'text-gray-500 hover:text-yellow-500'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleReaction(upload.id, 'sparkle')
+                    }}
+                    disabled={loadingReactions}
                   >
-                    <MessageCircle className="h-4 w-4 mr-1" />
-                    <span className="text-xs">0</span>
+                    <Sparkles 
+                      className={`h-4 w-4 mr-1 ${
+                        userReactions[upload.id]?.sparkle ? 'fill-current' : ''
+                      }`} 
+                    />
+                    <span className="text-xs">
+                      {reactionCounts[upload.id]?.sparkle || 0}
+                    </span>
                   </Button>
                 </div>
                 
-                <Badge variant="outline" className="text-xs">
+                {/* <Badge variant="outline" className="text-xs">
                   {upload.status === 'approved' ? 'Approved' : 'Pending'}
-                </Badge>
+                </Badge> */}
               </div>
             </CardFooter>
           </Card>

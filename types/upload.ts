@@ -34,6 +34,16 @@ export interface DatabaseUploadWithEvent extends DatabaseUpload {
 // ==================== FRONTEND TYPES ====================
 
 /**
+ * Reaction counts for an upload
+ */
+export interface ReactionCounts {
+  heart: number
+  sparkle: number
+  like?: number
+  love?: number
+}
+
+/**
  * Frontend representation of an upload
  * Used in components and stores
  */
@@ -48,6 +58,12 @@ export interface Upload {
   ip_address: string | null
   created_at: string
   updated_at: string
+  // Reaction data
+  reactions?: ReactionCounts
+  hasUserReacted?: {
+    heart: boolean
+    sparkle: boolean
+  }
 }
 
 /**

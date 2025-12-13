@@ -51,9 +51,13 @@ export default async function EventPage({ params }: PageProps) {
   console.log('Found event:', event.title)
   console.log('Event created by:', event.created_by)
   
+  // Check if user is logged in
+  const isLoggedIn = !!userId
+
   // Check if current user is the event owner (admin)
   const isAdmin = userId && event.created_by === userId ? true : false
   
+  console.log('User is logged in?', isLoggedIn, '(User:', userId, ')')
   console.log('User is admin/owner?', isAdmin, '(User:', userId, 'Creator:', event.created_by, ')')
 
   // Check if event is active and public
@@ -85,5 +89,5 @@ export default async function EventPage({ params }: PageProps) {
   }
 
   console.log('Rendering event gallery for:', event.title)
-  return <EventGallery event={event} eventCode={code} isAdmin={isAdmin} qrCodeUrl={qrCodeUrl} />
+  return <EventGallery event={event} eventCode={code} isLoggedIn={isLoggedIn} isAdmin={isAdmin} qrCodeUrl={qrCodeUrl} />
 }

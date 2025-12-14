@@ -38,6 +38,7 @@ Privacy-focused, QR-powered photo sharing platform designed specifically for gro
 - **Row-Level Security**: Supabase RLS policies protect user data
 - **Creator-Only Moderation**: Event owners control their own event galleries
 - **Anonymous Guest Access**: No tracking or accounts required for photo viewing/uploading
+- **Authentication**: Secure login with email/password verification.
 
 ## 🚀 Tech Stack
 

@@ -42,19 +42,29 @@ export default function SignupForm() {
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true)
     
-    // Use our auth store to create account!
-    const { error } = await signUp(data.email, data.password, data.fullName)
-    
-    if (error) {
-      setError('root', { message: error })
-    } else {
-      // Success! Redirect to dashboard
-      console.log('🎉 Account created! Redirecting to dashboard...')
+    try {
+      // Use our auth store to create account!
+      const { error } = await signUp(data.email, data.password, data.fullName)
+      
+      if (error) {
+        setError('root', { message: error })
+        setIsLoading(false)
+        return
+      }
+      
+      // Success! Wait a bit for auth state to settle, then redirect
+      console.log('🎉 Account created! Waiting for auth state to settle...')
+      
+      // Give Zustand store time to update and Supabase session to be established
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      console.log('Redirecting to dashboard...')
       router.push('/dashboard')
       router.refresh()
+    } catch (err) {
+      setError('root', { message: 'An unexpected error occurred' })
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }
 
   return (
@@ -140,6 +150,7 @@ export default function SignupForm() {
                 id="password"
                 type="password"
                 placeholder="Enter your password"
+                autoComplete="new-password"
                 {...register('password')}
                 disabled={isLoading}
                 className="mmt-1
@@ -166,6 +177,7 @@ export default function SignupForm() {
               id="confirmPassword"
               type="password"
               placeholder="Re-enter your password"
+              autoComplete="new-password"
               {...register('confirmPassword')}
               disabled={isLoading}
               className="!mmt-1

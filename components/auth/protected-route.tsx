@@ -21,8 +21,12 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   useEffect(() => {
     if (!isLoading && isInitialized && !user) {
-      console.log('Access denied - redirecting to login')
-      router.push('/login') 
+      // Give auth state a moment to stabilize before redirecting
+      const timer = setTimeout(() => {
+        console.log('Access denied - redirecting to login')
+        router.push('/login') 
+      }, 500)
+      return () => clearTimeout(timer)
     }
   }, [user, isLoading, isInitialized, router])
 

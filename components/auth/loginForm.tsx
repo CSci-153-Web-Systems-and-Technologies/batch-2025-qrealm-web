@@ -158,6 +158,16 @@ export default function LoginForm() {
             {errors.root && (
             <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">
                 {errors.root.message}
+                {errors.root.message?.includes('verify your email') && (
+                  <div className="mt-2">
+                    <Link 
+                      href="/resend-verification" 
+                      className="text-indigo-600 hover:text-indigo-700 underline font-medium"
+                    >
+                      Resend verification email
+                    </Link>
+                  </div>
+                )}
             </div>
             )}
 

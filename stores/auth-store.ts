@@ -12,7 +12,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void
   checkAuth: () => Promise<void>
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null; requiresVerification?: boolean }>
   signOut: () => Promise<void>
 }
 
@@ -75,6 +75,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       
       if (data.user) {
+        // Check if email is verified
+        if (!data.user.email_confirmed_at) {
+          // Sign out the user since email is not verified
+          await supabase.auth.signOut()
+          set({ isLoading: false })
+          return { error: 'Please verify your email address before signing in. Check your inbox for the verification link.' }
+        }
+        
         // Fetch user profile after successful sign in
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -114,6 +122,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           data: {
             full_name: fullName,
           },
+          emailRedirectTo: `${window.location.origin}/verify-email`,
         },
       })
       
@@ -123,20 +132,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       
       if (data.user) {
-        // Immediately fetch the profile that was created by the trigger
-        // Add small delay to ensure trigger has executed
-        await new Promise(resolve => setTimeout(resolve, 500))
-        
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single()
-        
-        if (!profileError && profile) {
-          set({ user: profile, isLoading: false, isInitialized: true })
-          return { error: null }
+        // Check if email confirmation is required
+        if (data.user.identities && data.user.identities.length === 0) {
+          // User already exists
+          set({ isLoading: false, isInitialized: true })
+          return { error: 'An account with this email already exists. Please sign in instead.' }
         }
+        
+        // Email verification is required, don't sign in the user yet
+        // User will be logged out and redirected to verification page
+        set({ user: null, isLoading: false, isInitialized: true })
+        return { error: null, requiresVerification: true }
       }
       
       set({ isLoading: false, isInitialized: true })

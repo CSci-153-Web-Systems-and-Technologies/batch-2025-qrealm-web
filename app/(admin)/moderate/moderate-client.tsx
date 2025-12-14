@@ -49,11 +49,21 @@ export default function ModerateClient({
     ? uploads
     : uploads.filter((u) => u.event?.id === filter)
 
-  const getUploaderDisplay = (upload: ModerationUpload) => {
-    if (upload.uploaded_by && upload.uploaded_by.trim() !== '') {
-      return upload.uploaded_by
+  const getImageUrl = (url: string | undefined) => {
+    // Validate URL is a proper Supabase storage URL
+    if (!url) return '/images/placeholder-event.svg'
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return '/images/placeholder-event.svg'
     }
-    return 'Anonymous'
+    // Don't load test domains
+    if (url.includes('test.com') || url.includes('example.com')) {
+      return '/images/placeholder-event.svg'
+    }
+    return url
+  }
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = '/images/placeholder-event.svg'
   }
 
   const formatDate = (dateString: string) => {
@@ -159,6 +169,13 @@ export default function ModerateClient({
       ))}
     </div>
   )
+
+  const getUploaderDisplay = (upload: ModerationUpload) => {
+    if (upload.uploaded_by) {
+      return upload.uploaded_by
+    }
+    return 'Anonymous'
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -276,9 +293,10 @@ export default function ModerateClient({
                         <div className="w-32 h-32 flex-shrink-0">
                           <div className="w-full h-full overflow-hidden rounded-lg bg-gray-100">
                             <img
-                              src={upload.image_url}
+                              src={getImageUrl(upload.image_url)}
                               alt={upload.caption || 'Pending review'}
                               className="w-full h-full object-cover"
+                              onError={handleImageError}
                             />
                           </div>
                         </div>

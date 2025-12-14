@@ -6,11 +6,18 @@ import { useRouter } from 'next/navigation'
 import { 
   Calendar, Image, CheckCircle2, Clock, AlertCircle,
   TrendingUp, Plus, Eye, QrCode, Settings, ExternalLink,
-  BarChart3, Users, MapPin, Sparkles
+  BarChart3, Users, MapPin, Sparkles, Trash2, MoreVertical
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import DeleteEventModal from '@/components/events/delete-event-modal'
 import type { Event as AppEvent } from '@/types/event'
 
 interface DashboardStats {
@@ -50,6 +57,8 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const router = useRouter()
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [eventToDelete, setEventToDelete] = useState<AppEvent | null>(null)
 
   const filteredEvents = events.filter((event: AppEvent) => {
     if (filter === 'active') return event.is_active
@@ -69,6 +78,29 @@ export default function DashboardClient({
   const getEventStatus = (event: AppEvent) => {
     if (!event.is_active) return { label: 'Inactive', color: 'bg-gray-100 text-gray-800' }
     return { label: 'Active', color: 'bg-green-100 text-green-800' }
+  }
+
+  const handleDeleteClick = (event: AppEvent) => {
+    setEventToDelete(event)
+    setDeleteModalOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!eventToDelete) return
+
+    const res = await fetch(`/api/events/${eventToDelete.id}/delete`, {
+      method: 'DELETE'
+    })
+
+    if (!res.ok) {
+      const error = await res.json()
+      throw new Error(error.error || 'Failed to delete event')
+    }
+
+    // Success - close modal and refresh
+    setDeleteModalOpen(false)
+    setEventToDelete(null)
+    router.refresh()
   }
 
   return (
@@ -339,7 +371,7 @@ export default function DashboardClient({
                     {/* Event Image */}
                     <div className="aspect-video bg-gray-100 overflow-hidden relative">
                       <img 
-                        src={event.cover_image_url || '/placeholder-event.svg'}
+                        src={event.cover_image_url || '/images/placeholder-event.svg'}
                         alt={event.title}
                         className="w-full h-full object-cover"
                       />
@@ -361,18 +393,24 @@ export default function DashboardClient({
                         )}
                       </div>
 
-                      {/* Stats (per-event counts optional; hidden if unavailable) */}
+                      {/* Stats */}
                       <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-brand/5 rounded-lg">
                         <div className="text-center">
-                          <p className="text-lg font-bold text-gray-900">—</p>
+                          <p className="text-lg font-bold text-gray-900">
+                            {(event as any).uploadStats?.approved || 0}
+                          </p>
                           <p className="text-[10px] sm:text-xs text-gray-600">Approved</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-lg font-bold text-brand">—</p>
+                          <p className="text-lg font-bold text-brand">
+                            {(event as any).uploadStats?.pending || 0}
+                          </p>
                           <p className="text-[10px] sm:text-xs text-gray-600">Pending</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-lg font-bold text-gray-900">—</p>
+                          <p className="text-lg font-bold text-gray-900">
+                            {(event as any).uploadStats?.total || 0}
+                          </p>
                           <p className="text-[10px] sm:text-xs text-gray-600">Total</p>
                         </div>
                       </div>
@@ -415,6 +453,24 @@ export default function DashboardClient({
                             View
                           </Link>
                         </Button>
+                        
+                        {/* More Options Dropdown */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="sm" variant="outline" className="px-2">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteClick(event)}
+                              className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete Event
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </CardContent>
                   </Card>
@@ -423,6 +479,21 @@ export default function DashboardClient({
             </div>
           )}
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {eventToDelete && (
+          <DeleteEventModal
+            isOpen={deleteModalOpen}
+            onClose={() => {
+              setDeleteModalOpen(false)
+              setEventToDelete(null)
+            }}
+            onConfirm={handleDeleteConfirm}
+            eventTitle={eventToDelete.title}
+            eventId={eventToDelete.id}
+            photoCount={(eventToDelete as any).uploadStats?.total || 0}
+          />
+        )}
       </div>
     </div>
   )

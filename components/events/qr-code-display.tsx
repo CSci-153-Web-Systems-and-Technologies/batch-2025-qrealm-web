@@ -57,12 +57,14 @@ interface QRCodeDisplayProps {
     expected_attendees?: number;
     // status?: 'live' | 'scheduled' | 'ended' | 'draft' // Status feature soon
   };
+  deleteButton?: React.ReactNode;
 }
 export function QRCodeDisplay({
   qrCodeUrl,
   eventCode,
   eventTitle,
   eventData = {},
+  deleteButton,
 }: QRCodeDisplayProps) {
   const router = useRouter();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -381,18 +383,34 @@ export function QRCodeDisplay({
         </div>
 
         {/* QR Code Display and Actions */}
-        <QRDisplayActions
-          qrCodeUrl={qrCodeUrl}
-          eventCode={eventCode}
-          eventTitle={eventTitle}
-          isDownloading={isDownloading}
-          onCopyLink={copyQRLink}
-          onShare={shareQRCode}
-          onPrint={printQRCode}
-          onDownloadPNG={handleDownloadPNG}
-          onDownloadSVG={handleDownloadSVG}
-          onDownloadPDF={downloadPDF}
-        />
+        <div className="!space-y-6">
+          <QRDisplayActions
+            qrCodeUrl={qrCodeUrl}
+            eventCode={eventCode}
+            eventTitle={eventTitle}
+            isDownloading={isDownloading}
+            onCopyLink={copyQRLink}
+            onShare={shareQRCode}
+            onPrint={printQRCode}
+            onDownloadPNG={handleDownloadPNG}
+            onDownloadSVG={handleDownloadSVG}
+            onDownloadPDF={downloadPDF}
+          />
+
+          {/* Danger Zone */}
+          {deleteButton && (
+            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="h-6 w-1 bg-red-600 rounded-full"></div>
+                <h3 className="text-base font-bold text-red-900">Danger Zone</h3>
+              </div>
+              <p className="text-xs text-red-700 mb-3">
+                Permanently delete this event and all associated data. This action cannot be undone.
+              </p>
+              {deleteButton}
+            </div>
+          )}
+        </div>
       </div>
 
       

@@ -276,20 +276,7 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
                 </p>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3 justify-end">
-                {isAdmin && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowQRModal(true)}
-                  >
-                    <QrCode className="h-4 w-4 mr-2" />
-                    Show QR
-                  </Button>
-                )}
-
               
-              </div>
             </div>
           )}
 

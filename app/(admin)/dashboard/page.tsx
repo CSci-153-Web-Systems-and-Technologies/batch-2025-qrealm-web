@@ -17,6 +17,13 @@ export default async function DashboardPage() {
     redirect('/login')
   }
   
+  // Fetch user profile to get full_name
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+  
   // Fetch dashboard data
   const [stats, events, recentUploads] = await Promise.all([
     getDashboardStats(user.id),
@@ -26,7 +33,7 @@ export default async function DashboardPage() {
   
   return (
     <DashboardClient 
-      user={user}
+      user={{ ...user, full_name: profile?.full_name }}
       stats={stats}
       events={events}
       recentUploads={recentUploads}

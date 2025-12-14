@@ -10,11 +10,26 @@ interface TopNavbarProps {
   userEmail?: string | null
 }
 
-export default function TopNavbar({ userEmail }: TopNavbarProps) {
+export default function TopNavbar({ userEmail: initialUserEmail }: TopNavbarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [userEmail, setUserEmail] = useState<string | null>(initialUserEmail || null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // Fetch current user email if not provided
+    if (!userEmail) {
+      const fetchUserEmail = async () => {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user?.email) {
+          setUserEmail(user.email)
+        }
+      }
+      fetchUserEmail()
+    }
+  }, [userEmail])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -110,7 +125,7 @@ export default function TopNavbar({ userEmail }: TopNavbarProps) {
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-brand-600/10 py-2">
                 <div className="px-4 py-3 border-b border-brand-600/10">
                   <p className="text-sm font-medium text-gray-900">Signed in as</p>
-                  <p className="text-sm text-gray-600 truncate mt-1">{userEmail || 'user@example.com'}</p>
+                  <p className="text-sm text-gray-600 truncate mt-1">{userEmail || 'Loading...'}</p>
                 </div>
 
                 <div className="md:hidden py-2 border-b border-brand-600/10">

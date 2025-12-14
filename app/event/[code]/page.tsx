@@ -24,15 +24,56 @@ export default async function EventPage({ params }: PageProps) {
   console.log('User ID:', userId)
   console.log('Is user logged in?', !!userId)
   
-  // Find event by code
-  const { data: eventCode, error } = await supabase
-    .from('event_codes')
-    .select(`
-      *,
-      events (*)
-    `)
-    .eq('code', code)
-    .single()
+  // Try to find event by code first, then by event ID if code looks like a UUID
+  let eventCode
+  let error
+  
+  // Check if the code is a UUID format (try as event ID)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  
+  if (uuidRegex.test(code)) {
+    // Try to get the event directly by event ID
+    const { data, error: directError } = await supabase
+      .from('event_codes')
+      .select(`
+        *,
+        events (*)
+      `)
+      .eq('event_id', code)
+      .single()
+    
+    eventCode = data
+    error = directError
+    
+    if (error) {
+      console.log('Not found by event ID, trying as code...')
+      // Fall back to searching by code
+      const { data: codeData, error: codeError } = await supabase
+        .from('event_codes')
+        .select(`
+          *,
+          events (*)
+        `)
+        .eq('code', code)
+        .single()
+      
+      eventCode = codeData
+      error = codeError
+    }
+  } else {
+    // Standard code lookup
+    const { data, error: codeError } = await supabase
+      .from('event_codes')
+      .select(`
+        *,
+        events (*)
+      `)
+      .eq('code', code)
+      .single()
+    
+    eventCode = data
+    error = codeError
+  }
 
   console.log('Query result:', { eventCode, error })
 

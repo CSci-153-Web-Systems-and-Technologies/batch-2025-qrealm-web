@@ -44,11 +44,19 @@ export default function SignupForm() {
     
     try {
       // Use our auth store to create account!
-      const { error } = await signUp(data.email, data.password, data.fullName)
+      const { error, requiresVerification } = await signUp(data.email, data.password, data.fullName)
       
       if (error) {
         setError('root', { message: error })
         setIsLoading(false)
+        return
+      }
+      
+      // Check if email verification is required
+      if (requiresVerification) {
+        console.log('🎉 Account created! Email verification required.')
+        // Redirect to verification page
+        router.push('/verify-email')
         return
       }
       

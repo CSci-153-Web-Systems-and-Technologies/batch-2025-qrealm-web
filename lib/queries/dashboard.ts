@@ -55,13 +55,13 @@ export async function getDashboardStats(userId: string) {
 /**
  * Get user's events with photo counts
  */
-export async function getUserEventsWithStats(userId: string): Promise<Event[]> {
+export async function getUserEventsWithStats(userId: string): Promise<any[]> {
   const supabase = await createClient()
   
   // Keep selection minimal to avoid schema mismatches
   const { data: events, error } = await supabase
     .from('events')
-    .select('id,title,description,event_date,event_time,location,cover_image_url,is_active,is_public,created_at,created_by,category_id,custom_category')
+    .select('id,title,description,event_date,event_time,location,cover_image_url,is_active,is_public,created_at,created_by,category_id,custom_category,organizer,max_photos,expected_attendees,allow_photo_upload,ip_address,updated_at')
     .eq('created_by', userId)
     .order('created_at', { ascending: false })
 
@@ -76,8 +76,28 @@ export async function getUserEventsWithStats(userId: string): Promise<Event[]> {
     return []
   }
   
-  // Convert database events to frontend shape expected by UI
-  const frontendEvents: Event[] = (events || []).map(e => convertDatabaseEventToFrontend(e as any))
+  // Convert database events to frontend shape and add upload stats
+  const frontendEvents = await Promise.all((events || []).map(async (e) => {
+    // Fetch upload counts for this event
+    const { data: uploads } = await supabase
+      .from('uploads')
+      .select('id, status')
+      .eq('event_id', e.id)
+    
+    const approvedCount = uploads?.filter(u => u.status === 'approved').length || 0
+    const pendingCount = uploads?.filter(u => u.status === 'pending').length || 0
+    const totalCount = uploads?.length || 0
+    
+    return {
+      ...convertDatabaseEventToFrontend(e as any),
+      uploadStats: {
+        approved: approvedCount,
+        pending: pendingCount,
+        total: totalCount
+      }
+    }
+  }))
+  
   return frontendEvents
 }
 

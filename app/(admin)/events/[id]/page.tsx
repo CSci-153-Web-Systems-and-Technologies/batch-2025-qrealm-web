@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { EventDetailRefreshButton } from "@/components/events/event-detail-refresh-button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import EventDeleteButton from "./event-delete-button"
 
 interface PageProps {
   params: Promise<{
@@ -34,11 +35,16 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   const qrCode = event.event_codes?.[0];
 
+  // Get photo count
+  const { count: photoCount } = await supabase
+    .from('uploads')
+    .select('*', { count: 'exact', head: true })
+    .eq('event_id', id)
+
   const QRDisplay = QRCodeDisplay as any;
 
   return (
-    <div className="!container !mx-auto !py-8">
-
+    <div className="!container !mx-auto !py-8 relative">
       {/* QR Code Display handles everything */}
       {qrCode ? (
         <QRDisplay
@@ -62,6 +68,13 @@ export default async function EventDetailPage({ params }: PageProps) {
             photosCount: event.photos_count,
             // Add other fields as needed
           }}
+          deleteButton={
+            <EventDeleteButton 
+              eventId={event.id}
+              eventTitle={event.title}
+              photoCount={photoCount || 0}
+            />
+          }
         />
       ) : (
         <div className="max-w-md mx-auto bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">

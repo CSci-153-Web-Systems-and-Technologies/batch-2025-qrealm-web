@@ -62,7 +62,12 @@ export async function getUserEventPendingUploads(userId: string) {
     event: Array.isArray(row.event) ? row.event[0] : row.event,
   })) as ModerationUpload[]
 
-  return normalized
+  // Filter out uploads with invalid/test URLs
+  return normalized.filter((upload) => {
+    if (!upload.image_url) return false
+    // Only allow valid URLs (Supabase storage or https)
+    return upload.image_url.startsWith('http://') || upload.image_url.startsWith('https://')
+  })
 }
 
 export async function approveUpload(uploadId: string, userId: string) {

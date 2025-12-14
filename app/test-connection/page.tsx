@@ -81,6 +81,9 @@
 import { testConnection, TestConnectionResult } from '@/lib/test-connection'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
+// This route uses cookies (via Supabase client) so it must be dynamic
+export const dynamic = 'force-dynamic'
+
 export default async function TestConnectionPage() {
   const result: TestConnectionResult = await testConnection()
 

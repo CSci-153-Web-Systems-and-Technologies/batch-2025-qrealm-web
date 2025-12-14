@@ -122,18 +122,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return { error: error.message }
       }
       
-      // Note: The profile is automatically created by our trigger
-      // We don't set user here because email confirmation might be required
-      set({ isLoading: false })
-      
       if (data.user) {
-        return { error: null }
+        // Immediately fetch the profile that was created by the trigger
+        // Add small delay to ensure trigger has executed
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single()
+        
+        if (!profileError && profile) {
+          set({ user: profile, isLoading: false, isInitialized: true })
+          return { error: null }
+        }
       }
       
-      return { error: 'Sign up failed' }
+      set({ isLoading: false, isInitialized: true })
+      return { error: null }
     } catch (error) {
       console.error('Sign up error:', error)
-      set({ isLoading: false })
+      set({ isLoading: false, isInitialized: true })
       return { error: 'An unexpected error occurred' }
     }
   },

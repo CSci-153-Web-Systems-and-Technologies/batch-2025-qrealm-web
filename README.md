@@ -1,13 +1,12 @@
 # QRealm
 
-![Next.js](https://img.shields.io/badge/Next.js-16.0.1-darkviolet)
+![Next.js](https://img.shields.io/badge/Next.js-16.0.10-darkviolet)
 ![React](https://img.shields.io/badge/React-19.2.0-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Supabase](https://img.shields.io/badge/Supabase-2.79.0-darkgreen)
-![Zustand](https://img.shields.io/badge/Zustand-5.0.8-purple)
+![Zustand](https://img.shields.io/badge/Zustand-5.0.9-purple)
 ![React Hook Form](https://img.shields.io/badge/React_Hook_Form-7.66.0-pink)
 ![Zod](https://img.shields.io/badge/Zod-4.1.12-blue)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.16-38B2AC)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/CSci-153-Web-Systems-and-Technologies/batch-2025-qrealm-web.git)
 
@@ -17,14 +16,28 @@ Privacy-focused, QR-powered photo sharing platform designed specifically for gro
 
 ## ✨ Features
 
-- **No-Account Photo Upload**:  Guests upload photos instantly by scanning QR codes, no registration required
+### 🎯 Core Features
+- **No-Account Photo Upload**: Guests upload photos instantly by scanning QR codes, no registration required
 - **QR Code Event Access**: Auto-generated unique QR codes for instant gallery access without accounts
 - **Event Creator Ownership**: Users only moderate photos from events they created
 - **Smart Event Management**: Intuitive creation wizard with school event categories and custom options
-- **Direct Photo Download**: Users can download photos with proper attribution
+
+### 📸 Photo Gallery
 - **Responsive Photo Grid**: Modern masonry layout with full-screen lightbox viewing
-- **Authentication**: Secure login with Google OAuth and email/password
-- **Real-time Updates**:  Live photo count and gallery updates without page refresh
+- **Photo Reactions**: Heart and sparkle reaction counts for real-time engagement
+- **Direct Photo Download**: Users can download photos with proper attribution
+- **Photo Moderation**: Approve or reject uploads with pending/approved/rejected status
+
+### 👤 User Features
+- **Secure Authentication**: Email/password login and signup with Supabase Auth
+- **Admin Dashboard**: Comprehensive statistics showing total events, photos, approvals, and pending items
+- **Event Analytics**: Track photo counts, upload activity, and event performance
+- **Real-time Updates**: Live photo count and gallery updates without page refresh
+
+### 🛡️ Privacy & Security
+- **Row-Level Security**: Supabase RLS policies protect user data
+- **Creator-Only Moderation**: Event owners control their own event galleries
+- **Anonymous Guest Access**: No tracking or accounts required for photo viewing/uploading
 
 ## 🚀 Tech Stack
 
@@ -198,12 +211,6 @@ Before you begin, ensure you have:
     
    ```
 
-5. **Configure Google OAuth (Optional)**
-   
-   In your Supabase dashboard:
-   - Go to Authentication → Providers
-   - Enable Google provider
-   - Add your Google OAuth credentials
 
 ## 🏃‍♂️ Running the Application
 

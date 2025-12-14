@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,14 @@ import { Loader2, Mail, CheckCircle2, XCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<VerifyEmailFallback />}>
+      <VerifyEmailContent />
+    </Suspense>
+  )
+}
+
+function VerifyEmailContent() {
   const [status, setStatus] = useState<'verifying' | 'success' | 'error' | 'pending'>('pending')
   const [message, setMessage] = useState('')
   const [email, setEmail] = useState('')
@@ -188,6 +196,17 @@ export default function VerifyEmailPage() {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+function VerifyEmailFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="flex items-center gap-3 text-white">
+        <Loader2 className="h-6 w-6 animate-spin" />
+        <span className="text-white/80">Loading...</span>
       </div>
     </div>
   )

@@ -4,103 +4,43 @@ import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-
-export interface AUPAgreement {
-  id: string
-  text: string
-  required: boolean
-}
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
 export interface AUPModalProps {
   isOpen: boolean
   onClose: () => void
-  onAccept: (uploaderName?: string) => void
-  eventTitle: string
-  maxFiles?: number
-  maxFileSizeMB?: number
-  acceptedFileTypes?: string[]
+  onAccept: () => void
 }
-
-const DEFAULT_AUP_ITEMS: AUPAgreement[] = [
-  {
-    id: 'appropriate',
-    text: 'I confirm that all photos are appropriate for a school event and contain no inappropriate content',
-    required: true
-  },
-  {
-    id: 'rights',
-    text: 'I have the right to share these photos and they do not violate anyone\'s privacy',
-    required: true
-  },
-  {
-    id: 'moderation',
-    text: 'I understand that all photos will be reviewed by event organizers before appearing in the gallery',
-    required: true
-  },
-  {
-    id: 'storage',
-    text: 'I agree that photos may be stored and displayed as part of the event gallery',
-    required: true
-  },
-  {
-    id: 'anonymous',
-    text: 'I would like to remain anonymous (leave name blank)',
-    required: false
-  }
-]
 
 export function AUPModal({ 
   isOpen, 
   onClose, 
-  onAccept, 
-  eventTitle,
-  maxFiles = 10,
-  maxFileSizeMB = 10,
-  acceptedFileTypes = ['JPEG', 'PNG', 'WebP', 'GIF']
+  onAccept,
 }: AUPModalProps) {
-  const [uploaderName, setUploaderName] = useState('')
-  const [agreements, setAgreements] = useState<Record<string, boolean>>({})
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const allRequiredAccepted = DEFAULT_AUP_ITEMS
-    .filter(item => item.required)
-    .every(item => agreements[item.id])
-
-  const handleAgreementToggle = (id: string, checked: boolean) => {
-    setAgreements(prev => ({
-      ...prev,
-      [id]: checked
-    }))
-  }
-
   const handleSubmit = () => {
-    if (!allRequiredAccepted) return
+    if (!agreedToTerms) return
     
     setIsSubmitting(true)
     
-    // If anonymous agreement is checked, clear the name
-    const finalName = agreements['anonymous'] ? '' : uploaderName.trim()
-    
     // Small delay for better UX
     setTimeout(() => {
-      onAccept(finalName)
+      onAccept()
       setIsSubmitting(false)
       resetForm()
     }, 300)
   }
 
   const resetForm = () => {
-    setUploaderName('')
-    setAgreements({})
+    setAgreedToTerms(false)
   }
 
   const handleOpenChange = (open: boolean) => {
@@ -112,81 +52,131 @@ export function AUPModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Upload Photos to "{eventTitle}"</DialogTitle>
+      <DialogContent className="max-w-2xl max-h-[95vh] p-0 flex flex-col">
+        {/* Hidden title for accessibility */}
+        <VisuallyHidden>
+          <DialogTitle>QRealm Photo Upload Agreement</DialogTitle>
           <DialogDescription>
-            Please read and accept the following terms before uploading photos
+            Please read and accept the terms before uploading your photos
           </DialogDescription>
-        </DialogHeader>
+        </VisuallyHidden>
 
-        <div className="space-y-4 py-4">
-          {/* Uploader Name (Optional) */}
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+          <h2 className="text-lg font-bold">QRealm Photo Upload Agreement</h2>
+          <p className="text-xs text-gray-600 mt-0.5">Please read and accept the terms before uploading your photos</p>
+        </div>
+
+        {/* Content - scrollable */}
+        <div className="overflow-y-auto flex-1 px-6 py-4 space-y-3">
+          {/* Prohibited Activities */}
           <div className="space-y-2">
-            <Label htmlFor="uploader-name">Your Name (Optional)</Label>
-            <Input
-              id="uploader-name"
-              type="text"
-              placeholder="Enter your name to be credited"
-              value={uploaderName}
-              onChange={(e) => setUploaderName(e.target.value)}
-              disabled={agreements['anonymous']}
-            />
-            <p className="text-sm text-gray-500">
-              Leave blank if you prefer to remain anonymous
+            <p className="text-sm text-gray-800">
+              You are responsible for the security and appropriate use of all photos you upload to QRealm. Using QRealm's platform for the following is strictly prohibited:
             </p>
-          </div>
-
-          {/* AUP Agreements */}
-          <div className="space-y-3">
-            <h4 className="font-medium">Acceptable Use Policy</h4>
-            {DEFAULT_AUP_ITEMS.map((item) => (
-              <div key={item.id} className="flex items-start space-x-2">
-                <Checkbox
-                  id={item.id}
-                  checked={!!agreements[item.id]}
-                  onCheckedChange={(checked) => 
-                    handleAgreementToggle(item.id, checked as boolean)
-                  }
-                  className="mt-1"
-                />
-                <Label htmlFor={item.id} className="text-sm leading-tight cursor-pointer">
-                  {item.text}
-                  {item.required && <span className="text-red-500 ml-1">*</span>}
-                </Label>
-              </div>
-            ))}
-          </div>
-
-          {/* Upload Guidelines */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <h4 className="font-medium text-blue-800 mb-1">Upload Guidelines</h4>
-            <ul className="text-sm text-blue-700 space-y-1">
-              <li>• Maximum {maxFiles} photos per upload session</li>
-              <li>• Maximum file size: {maxFileSizeMB}MB per photo</li>
-              <li>• Accepted formats: {acceptedFileTypes.join(', ')}</li>
-              <li>• Photos will be reviewed before appearing in the gallery</li>
+            
+            <ul className="space-y-1.5 ml-3">
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Any activities that violate the Cybercrime Prevention Act of 2012, including content-related offenses such as cybersex, child pornography, libel, and unsolicited commercial communications.</span>
+              </li>
+              
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Uploading photos without proper consent, including pictures of identifiable individuals without permission, minors without parental approval, or any content that invades personal privacy.</span>
+              </li>
+              
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Violating copyright law, including illegally duplicating or transmitting copyrighted pictures, professional photographs, or other protected content without authorization.</span>
+              </li>
+              
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Intentionally introducing malicious code, including viruses, worms, spyware, or any software that may compromise platform security.</span>
+              </li>
+              
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Causing security breaches, including accessing events, data, or accounts you are not authorized to access, or circumventing any platform security measures.</span>
+              </li>
+              
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Causing service disruption, including any attacks, floods, or activities that degrade QRealm's performance for other users.</span>
+              </li>
+              
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Uploading content that violates local laws, including defamatory material, hate speech, or illegal activities.</span>
+              </li>
             </ul>
+          </div>
+
+          {/* QRealm Rights */}
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold text-gray-800">QRealm reserves the right to:</p>
+            
+            <ul className="space-y-1 ml-3">
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Review, moderate, and approve/reject all uploaded photos</span>
+              </li>
+              
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Remove any content violating these terms without notice</span>
+              </li>
+              
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Block users who repeatedly violate these terms</span>
+              </li>
+              
+              <li className="text-xs text-gray-700 flex gap-2">
+                <span className="text-blue-500 flex-shrink-0 mt-0.5">•</span>
+                <span>Cooperate with legal authorities regarding illegal content</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Warning */}
+          <p className="text-xs text-red-500 font-medium">
+            Violations may result in content removal, platform banning, and potential legal action.
+          </p>
+
+          {/* Agreement Checkbox */}
+          <div className="flex items-start space-x-2 bg-gray-50 p-3 rounded border border-gray-200">
+            <Checkbox
+              id="agree-terms"
+              checked={agreedToTerms}
+              onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+              className="mt-0.5"
+            />
+            <Label htmlFor="agree-terms" className="text-xs text-gray-700 cursor-pointer leading-relaxed">
+              I have read and agree to the terms above
+            </Label>
           </div>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2">
+        {/* Footer */}
+        <div className="border-t border-gray-200 p-4 bg-white flex gap-2 flex-shrink-0">
           <Button 
             variant="outline" 
             onClick={onClose} 
             disabled={isSubmitting}
-            className="w-full sm:w-auto"
+            className="flex-1 text-sm"
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSubmit} 
-            disabled={!allRequiredAccepted || isSubmitting}
-            className="w-full sm:w-auto"
+            disabled={!agreedToTerms || isSubmitting}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm"
           >
-            {isSubmitting ? 'Processing...' : 'Accept & Continue'}
+            {isSubmitting ? 'Processing...' : 'Upload Photos'}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

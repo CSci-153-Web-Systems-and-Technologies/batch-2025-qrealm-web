@@ -110,9 +110,9 @@ export function GuestUploadForm({
     setShowAUP(true)
   }, [])
 
-  const handleAUPAccept = useCallback((acceptedUploaderName?: string) => {
+  const handleAUPAccept = useCallback(() => {
     setShowAUP(false)
-    handleUpload(acceptedUploaderName)
+    handleUpload(undefined)
   }, [handleUpload])
 
   const handleDismissResults = useCallback(() => {
@@ -210,9 +210,6 @@ export function GuestUploadForm({
         isOpen={showAUP}
         onClose={() => setShowAUP(false)}
         onAccept={handleAUPAccept}
-        eventTitle={eventTitle}
-        maxFiles={maxUploads}
-        maxFileSizeMB={maxFileSizeMB}
       />
     </>
   )

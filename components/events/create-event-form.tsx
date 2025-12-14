@@ -277,7 +277,7 @@ useEffect(() => {
                   className={`
                     border-2 border-dashed border-gray-300 rounded-lg p-8 text-center 
                     transition-all duration-200 ease-in-out
-                    hover:border-blue-400 hover:bg-blue-50
+                    hover:border-brand-500 hover:bg-brand-50
                     cursor-pointer
                   `}
                   onClick={handleChangeImage}
@@ -287,7 +287,7 @@ useEffect(() => {
                       <Upload className="h-8 w-8 text-gray-400" />
                     </div>
                     <p className="text-sm font-medium text-gray-700">
-                      <span className="text-blue-600">Click to upload</span> or drag and drop
+                      <span className="text-brand-600">Click to upload</span> or drag and drop
                     </p>
                     <p className="text-xs text-gray-500">
                       JPEG, PNG, WebP, GIF up to 5MB • Recommended: 16:9 ratio
@@ -313,7 +313,7 @@ useEffect(() => {
                         variant="outline"
                         size="sm"
                         onClick={handleChangeImage}
-                        className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                        className="text-brand-600 border-brand-200 hover:bg-brand-50 hover:text-brand-700"
                       >
                         <Image className="h-4 w-4 mr-1" />
                         Change
@@ -392,24 +392,26 @@ useEffect(() => {
               <div className="grid grid-cols-1 md:grid-cols-2 !gap-4">
                 <div className="!space-y-2">
                   <Label htmlFor="title">Title <span className="text-red-500">*</span></Label>
-                  <Input
-                    id="title"
-                    placeholder="e.g., Annual Science Fair 2024"
-                    {...register('title')}
-                    className='!p-2 !text-sm !sm:text-base !lg:text-sm'
+                    <Input
+                      id="title"
+                      placeholder="e.g., Annual Science Fair 2024"
+                      {...register('title')}
+                      className='!p-2 !text-sm !sm:text-base !lg:text-sm bg-white/20 border border-white/30 backdrop-blur-lg text-gray-900 placeholder:text-gray-500 rounded-xl focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50'
                   />
                   {errors.title && (
-                    <p className="text-sm text-red-600">{errors.title.message}</p>
+                    <div className="mt-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-700 border border-red-200">
+                      {errors.title.message}
+                    </div>
                   )}
                 </div>
 
                 <div className="!space-y-2">
                   <Label htmlFor="organizer">Organizer/Host</Label>
-                  <Input
-                    id="organizer"
-                    placeholder="e.g., Science Department, Student Council"
-                    {...register('organizer')}
-                    className='!p-2 !text-sm !sm:text-base !lg:text-sm'
+                    <Input
+                      id="organizer"
+                      placeholder="e.g., Science Department, Student Council"
+                      {...register('organizer')}
+                      className='!p-2 !text-sm !sm:text-base !lg:text-sm bg-white/20 border border-white/30 backdrop-blur-lg text-gray-900 placeholder:text-gray-500 rounded-xl focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50'
                   />
                 </div>
               </div>
@@ -421,10 +423,12 @@ useEffect(() => {
                   placeholder="Describe your event for attendees..."
                   {...register('description')}
                   rows={3}
-                  className='!p-2 !text-sm !sm:text-base !text-red-500'
+                    className='!p-2 !text-sm !sm:text-base bg-white/20 border border-white/30 backdrop-blur-lg text-gray-900 placeholder:text-gray-500 rounded-xl focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50'
                 />
                 {errors.description && (
-                  <p className="text-sm text-red-600">{errors.description.message}</p>
+                  <div className="mt-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-700 border border-red-200">
+                    {errors.description.message}
+                  </div>
                 )}
               </div>
 
@@ -436,7 +440,7 @@ useEffect(() => {
                     onValueChange={handleCategoryChange}
                     />
                     {errors.category && (
-                    <p className="text-sm text-red-600 !p-2">{errors.category.message}</p>
+                    <div className="mt-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-700 border border-red-200">{errors.category.message}</div>
                     )}
                 </div>
 
@@ -459,9 +463,10 @@ useEffect(() => {
                     id="custom_category"
                     placeholder="Enter your custom category"
                     {...register('custom_category')}
+                      className='!p-2 !text-sm !sm:text-base !lg:text-sm bg-white/20 border border-white/30 backdrop-blur-lg text-gray-900 placeholder:text-gray-500 rounded-xl focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50'
                   />
                   {errors.custom_category && (
-                    <p className="text-sm text-red-600 !p-2">{errors.custom_category.message}</p>
+                    <div className="mt-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-700 border border-red-200">{errors.custom_category.message}</div>
                   )}
                 </div>
               )}
@@ -472,10 +477,10 @@ useEffect(() => {
                   id="location"
                   placeholder="e.g., School Gym, Auditorium, Field"
                   {...register('location')}
-                  className='!p-2 !text-sm !sm:text-base !lg:text-sm'
+                    className='!p-2 !text-sm !sm:text-base !lg:text-sm bg-white/20 border border-white/30 backdrop-blur-lg text-gray-900 placeholder:text-gray-500 rounded-xl focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50'
                 />
                 {errors.location && (
-                  <p className="text-sm text-red-600">{errors.location.message}</p>
+                  <div className="mt-1 text-xs px-2 py-1 rounded-md bg-red-50 text-red-700 border border-red-200">{errors.location.message}</div>
                 )}
               </div>
             </CardContent>
@@ -516,7 +521,7 @@ useEffect(() => {
                         id="expected_attendees"
                         type="number"
                         placeholder="e.g., 150"
-                        className='!p-2 !text-sm !sm:text-base !lg:text-sm'
+                        className='!p-2 !text-sm !sm:text-base !lg:text-sm bg-white/20 border border-white/30 backdrop-blur-lg text-gray-900 placeholder:text-gray-500 rounded-xl focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50'
                         onChange={handleNumberChange('expected_attendees')}
                         />
                         <p className="text-xs text-gray-500">
@@ -596,7 +601,7 @@ useEffect(() => {
                 
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">QR Code</span>
-                  <Badge variant="outline" className="bg-blue-100 text-blue-800 !p-1">
+                  <Badge variant="outline" className="bg-brand-100 text-brand-800 !p-1">
                     Auto-generated
                   </Badge>
                 </div>

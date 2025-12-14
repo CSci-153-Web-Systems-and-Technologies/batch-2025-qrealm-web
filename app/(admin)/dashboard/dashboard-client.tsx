@@ -109,7 +109,7 @@ export default function DashboardClient({
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 brand-gradient bg-clip-text text-transparent">
-            Welcome back, {user.email?.split('@')[0] || 'there'}! 
+            Welcome back, {user.full_name || user.email?.split('@')[0] || 'there'}! 
           </h1>
           <p className="text-gray-600">
             Here's what's happening with your events today.

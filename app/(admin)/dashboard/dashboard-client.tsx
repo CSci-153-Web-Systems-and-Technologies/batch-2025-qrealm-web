@@ -393,18 +393,24 @@ export default function DashboardClient({
                         )}
                       </div>
 
-                      {/* Stats (per-event counts optional; hidden if unavailable) */}
+                      {/* Stats */}
                       <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-brand/5 rounded-lg">
                         <div className="text-center">
-                          <p className="text-lg font-bold text-gray-900">—</p>
+                          <p className="text-lg font-bold text-gray-900">
+                            {(event as any).uploadStats?.approved || 0}
+                          </p>
                           <p className="text-[10px] sm:text-xs text-gray-600">Approved</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-lg font-bold text-brand">—</p>
+                          <p className="text-lg font-bold text-brand">
+                            {(event as any).uploadStats?.pending || 0}
+                          </p>
                           <p className="text-[10px] sm:text-xs text-gray-600">Pending</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-lg font-bold text-gray-900">—</p>
+                          <p className="text-lg font-bold text-gray-900">
+                            {(event as any).uploadStats?.total || 0}
+                          </p>
                           <p className="text-[10px] sm:text-xs text-gray-600">Total</p>
                         </div>
                       </div>
@@ -485,7 +491,7 @@ export default function DashboardClient({
             onConfirm={handleDeleteConfirm}
             eventTitle={eventToDelete.title}
             eventId={eventToDelete.id}
-            photoCount={0}
+            photoCount={(eventToDelete as any).uploadStats?.total || 0}
           />
         )}
       </div>

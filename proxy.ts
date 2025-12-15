@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { pathname, searchParams, origin } = request.nextUrl;
 
   // Avoid loops on verify-email page itself
@@ -15,6 +15,7 @@ export async function proxy(request: NextRequest) {
   if (code) {
     const redirectUrl = new URL('/api/auth/callback', origin);
     redirectUrl.searchParams.set('code', code);
+    console.log('[Proxy] Redirecting code to callback:', redirectUrl.toString());
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -28,6 +29,7 @@ export async function proxy(request: NextRequest) {
     if (error) redirectUrl.searchParams.set('error', error);
     if (errorCode) redirectUrl.searchParams.set('error_code', errorCode);
     if (errorDescription) redirectUrl.searchParams.set('error_description', errorDescription);
+    console.log('[Proxy] Redirecting error to verify-email:', redirectUrl.toString());
     return NextResponse.redirect(redirectUrl);
   }
 

@@ -134,7 +134,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           data: {
             full_name: fullName,
           },
-          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+          // Redirect to homepage so Supabase query params get intercepted by proxy
+          // The proxy will then route to /verify-email with proper token_hash and type params
+          emailRedirectTo: `${window.location.origin}/`,
         },
       })
       

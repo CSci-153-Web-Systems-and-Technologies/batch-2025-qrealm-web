@@ -35,7 +35,8 @@ export default function ResendVerification({ email: initialEmail, onSuccess }: R
         type: 'signup',
         email: email,
         options: {
-          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+          // Redirect to homepage so Supabase query params get intercepted by proxy
+          emailRedirectTo: `${window.location.origin}/`,
         }
       })
 

@@ -83,7 +83,7 @@ export function QRCodeDisplay({
   useEffect(() => {
   if (eventData?.id) {
     console.log('QRDisplay: Fetching uploads for event ID:', eventData.id);
-    fetchEventUploads(eventData.id);
+    fetchEventUploads(eventData.id, true);
   }
   }, [eventData?.id, fetchEventUploads]);
 

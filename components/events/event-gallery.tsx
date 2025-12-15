@@ -87,7 +87,7 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
 
   // Fetch event and uploads
   useEffect(() => {
-    fetchEventUploads(event.id)
+    fetchEventUploads(event.id, true)
   }, [event.id, fetchEventUploads])
 
   // Fetch QR code if not provided - FIXED TYPING
@@ -118,12 +118,12 @@ export function EventGallery({ event, eventCode, isLoggedIn = false, isAdmin = f
   }, [eventCode, storedQrCodeUrl, supabase])
 
   const handleUploadComplete = () => {
-    fetchEventUploads(event.id)
+    fetchEventUploads(event.id, true)
     setShowUploadForm(false)
   }
 
   const handleRefresh = () => {
-    fetchEventUploads(event.id)
+    fetchEventUploads(event.id, true)
     fetchEvent(event.id)
   }
 

@@ -22,9 +22,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error('[Moderation] Error approving upload:', error)
-    return NextResponse.json(
-      { error: error?.message || 'Failed to approve upload' },
-      { status: 500 }
-    )
+
+    const message = error?.message || 'Failed to approve upload'
+    const status = message.includes('Unauthorized') ? 403
+      : message.includes('blocked') ? 403
+      : message.includes('not found') || message.includes('moderated') ? 404
+      : 500
+
+    return NextResponse.json({ error: message }, { status })
   }
 }

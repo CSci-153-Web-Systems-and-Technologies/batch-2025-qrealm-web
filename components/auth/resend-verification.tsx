@@ -35,7 +35,7 @@ export default function ResendVerification({ email: initialEmail, onSuccess }: R
         type: 'signup',
         email: email,
         options: {
-          emailRedirectTo: `${window.location.origin}/verify-email`,
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         }
       })
 

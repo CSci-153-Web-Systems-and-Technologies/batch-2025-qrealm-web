@@ -105,7 +105,7 @@ export default function ModerateClient({
       startTransition(() => router.refresh())
     } catch (error) {
       console.error('[Moderation] Approve failed:', error)
-      alert('Failed to approve upload')
+      alert(`Failed to approve upload: ${(error as Error)?.message || 'Unknown error'}`)
     } finally {
       setProcessingId(null)
     }
@@ -137,7 +137,7 @@ export default function ModerateClient({
       startTransition(() => router.refresh())
     } catch (error) {
       console.error('[Moderation] Reject failed:', error)
-      alert('Failed to reject upload')
+      alert(`Failed to reject upload: ${(error as Error)?.message || 'Unknown error'}`)
     } finally {
       setProcessingId(null)
     }

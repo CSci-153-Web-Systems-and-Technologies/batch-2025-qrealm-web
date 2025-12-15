@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import type { Upload } from '@/types/upload'
 
 export interface ModerationUpload extends Upload {
@@ -72,6 +73,14 @@ export async function getUserEventPendingUploads(userId: string) {
 
 export async function approveUpload(uploadId: string, userId: string) {
   const supabase = await createClient()
+  const admin = createSupabaseAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Service role key missing on server')
+  }
 
   const { data: upload, error: fetchError } = await supabase
     .from('uploads')
@@ -100,7 +109,11 @@ export async function approveUpload(uploadId: string, userId: string) {
     throw new Error('Unauthorized: You do not own this event')
   }
 
-  const { error: updateError } = await supabase
+  if ((upload as any).status && (upload as any).status !== 'pending') {
+    throw new Error(`Upload already moderated (status=${(upload as any).status})`)
+  }
+
+  const { data: updatedRows, error: updateError } = await admin
     .from('uploads')
     .update({
       status: 'approved',
@@ -108,10 +121,17 @@ export async function approveUpload(uploadId: string, userId: string) {
       updated_at: new Date().toISOString(),
     })
     .eq('id', uploadId)
+    .select('id, status')
 
   if (updateError) {
     console.error('[Moderation] Error approving upload:', updateError)
     throw updateError
+  }
+
+  if (!updatedRows || updatedRows.length === 0) {
+    throw new Error(
+      `Approve failed: RLS blocked or no rows updated (user=${userId}, owner=${eventOwnerId}, status=${(upload as any).status || 'unknown'})`
+    )
   }
 
   return { success: true }
@@ -119,6 +139,14 @@ export async function approveUpload(uploadId: string, userId: string) {
 
 export async function rejectUpload(uploadId: string, userId: string) {
   const supabase = await createClient()
+  const admin = createSupabaseAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Service role key missing on server')
+  }
 
   const { data: upload, error: fetchError } = await supabase
     .from('uploads')
@@ -162,14 +190,21 @@ export async function rejectUpload(uploadId: string, userId: string) {
     }
   }
 
-  const { error: deleteError } = await supabase
+  const { data: deletedRows, error: deleteError } = await admin
     .from('uploads')
     .delete()
     .eq('id', uploadId)
+    .select('id')
 
   if (deleteError) {
     console.error('[Moderation] Error deleting upload row:', deleteError)
     throw deleteError
+  }
+
+  if (!deletedRows || deletedRows.length === 0) {
+    throw new Error(
+      `Reject failed: RLS blocked or no rows deleted (user=${userId}, owner=${eventOwnerId}, status=${(upload as any).status || 'unknown'})`
+    )
   }
 
   return { success: true }

@@ -29,7 +29,17 @@ function VerifyEmailContent() {
       // Check if we have a token in the URL (from email link)
       const token_hash = searchParams.get('token_hash')
       const type = searchParams.get('type')
+      const code = searchParams.get('code')
+      const errorParam = searchParams.get('error')
 
+      // Handle error from callback redirect
+      if (errorParam) {
+        setStatus('error')
+        setMessage(decodeURIComponent(errorParam))
+        return
+      }
+
+      // Handle new format (token_hash + type)
       if (token_hash && type === 'email') {
         setStatus('verifying')
         
@@ -55,7 +65,32 @@ function VerifyEmailContent() {
           setStatus('error')
           setMessage('An unexpected error occurred during verification.')
         }
-      } else {
+      } 
+      // Handle old format (code parameter) - Supabase default email template
+      else if (code) {
+        setStatus('verifying')
+        
+        try {
+          const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+          if (error) {
+            setStatus('error')
+            setMessage(error.message || 'Verification failed. The link may have expired.')
+          } else {
+            setStatus('success')
+            setMessage('Your email has been verified successfully!')
+            
+            // Redirect to dashboard after 2 seconds
+            setTimeout(() => {
+              router.push('/dashboard')
+            }, 2000)
+          }
+        } catch (error) {
+          setStatus('error')
+          setMessage('An unexpected error occurred during verification.')
+        }
+      }
+      else {
         // No token in URL, check if user is already logged in and just waiting for verification
         const { data: { user } } = await supabase.auth.getUser()
         

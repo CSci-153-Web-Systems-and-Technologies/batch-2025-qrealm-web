@@ -10,6 +10,21 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Handle email verification flow (token_hash + type parameters)
+  // These come from Supabase email verification links
+  const token_hash = searchParams.get('token_hash');
+  const type = searchParams.get('type');
+  
+  if (token_hash && type) {
+    // Forward to verify-email page to handle the verification
+    const redirectUrl = new URL('/verify-email', origin);
+    redirectUrl.searchParams.set('token_hash', token_hash);
+    redirectUrl.searchParams.set('type', type);
+    console.log('[Proxy] Redirecting email verification to verify-email:', redirectUrl.toString());
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // Handle OAuth code exchange flow
   // If a code param exists, redirect to auth callback to exchange it for a session
   const code = searchParams.get('code');
   if (code) {

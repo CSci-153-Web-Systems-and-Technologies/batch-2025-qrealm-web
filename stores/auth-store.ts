@@ -44,6 +44,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         
         if (error) {
           console.error('Error fetching profile:', error)
+          // If it's a 406 error or profile not found, sign out the user
+          if (error.code === 'PGRST116' || error.message.includes('406')) {
+            console.log('Profile not found or access denied - signing out')
+            await supabase.auth.signOut()
+          }
           set({ user: null, isLoading: false, isInitialized: true })
           return
         }
@@ -92,8 +97,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         
         if (profileError) {
           console.error('Error fetching profile after sign in:', profileError)
+          // Provide more specific error messages
+          let errorMessage = 'Failed to load user profile'
+          if (profileError.code === 'PGRST116') {
+            errorMessage = 'Profile not found. Please contact support.'
+          } else if (profileError.message.includes('406')) {
+            errorMessage = 'Access denied. Please check your permissions.'
+          }
           set({ isLoading: false })
-          return { error: 'Failed to load user profile' }
+          return { error: errorMessage }
         }
         
         set({ user: profile, isLoading: false })

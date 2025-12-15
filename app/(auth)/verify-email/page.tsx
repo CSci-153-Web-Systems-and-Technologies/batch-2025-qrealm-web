@@ -34,8 +34,13 @@ function VerifyEmailContent() {
 
       // Handle error from callback redirect
       if (errorParam) {
+        let friendlyMessage = decodeURIComponent(errorParam)
+        // Map common error codes to clearer messages
+        if (friendlyMessage.includes('expired') || friendlyMessage.includes('invalid')) {
+          friendlyMessage = 'Email link is invalid or has expired. Please request a new verification email.'
+        }
         setStatus('error')
-        setMessage(decodeURIComponent(errorParam))
+        setMessage(friendlyMessage)
         return
       }
 
@@ -66,8 +71,10 @@ function VerifyEmailContent() {
           setMessage('An unexpected error occurred during verification.')
         }
       } 
-      // Handle old format (code parameter) - Supabase default email template
+      // Handle old format (code parameter) - Should NOT reach here if proxy works
+      // This is only a fallback for direct /verify-email?code=... access
       else if (code) {
+        console.warn('[VerifyEmail] Code found in verify-email page - this should have been handled by proxy')
         setStatus('verifying')
         
         try {

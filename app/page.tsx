@@ -132,14 +132,14 @@ export default function LandingPage() {
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
-                <Link href="/demo" className="w-full sm:w-auto">
+                <Link href="/login" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="lg"
                     className="gap-2 min-w-[200px]"
                   >
                     <QrCode className="w-4 h-4" />
-                    Scan QR Code
+                    Sign In
                   </Button>
                 </Link>
               </div>

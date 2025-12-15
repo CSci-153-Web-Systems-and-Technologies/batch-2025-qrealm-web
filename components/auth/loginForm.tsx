@@ -85,6 +85,7 @@ export default function LoginForm() {
                 id="email"
                 type="email"
                 placeholder="Enter your email address"
+                autoComplete="email"
                 {...register('email')}
                 disabled={isLoading}
                 className="mmt-1
